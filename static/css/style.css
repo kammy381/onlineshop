@@ -19,3 +19,14 @@
 
 
 
+.static {
+  position:absolute;
+  background: lightblue;
+}
+
+.static:hover {
+  opacity:0;
+}
+
+
+
