@@ -1,10 +1,11 @@
 from flask import Flask, render_template
+from testlibfile import testlib
 
 app = Flask(__name__)
-
+#"{{url_for('static', filename='images/r2.png')}}"
 @app.route("/")
 def index():
-    return render_template('index.html')
+    return render_template('index.html',testlib=testlib)
 
 @app.route("/test")
 def test_site():
