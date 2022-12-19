@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Product Page</title>
+</head>
+
+<body>
+
+<h1>Product Details</h1>
+
+ <div class="mygriditem">
+     <img src="/static/images/{{item['image']}}" alt="picture of a cube" width="300" height="300">
+     <p><strong>Product name</strong>: {{item['productname']}}</p>
+     <p><strong>Price</strong>: {{item['price']}} dollarinos</p>
+     <p><strong>Article Number</strong>: {{item['article_number']}} dollarinos</p>
+     <p><strong>Manufacturer</strong>: {{item['manufacturer']}} dollarinos</p>
+     <p><strong>Available units</strong>: {{item['available_units']}} dollarinos</p>
+     <p><strong>Shipment size</strong>: {{item['shipment_size']}} dollarinos</p>
+
+ </div>
+
+</body>
+</html>
