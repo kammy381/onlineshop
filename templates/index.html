@@ -59,11 +59,11 @@
     <h2>Products</h2>
     <div class="mygridcontainer">
       {% for entry in testlib %}
-        <a href="{{ url_for('show_detail',target_id=entry['id']) }}">
+        <a href="{{ url_for('show_detail',target_id=entry['id']) }}" style="text-decoration: none; " >
           <div class="mygriditem">
             <img src="/static/images/{{entry['image']}}" alt="picture of a cube" width="300" height="300">
             <p><strong>Product name</strong>: {{entry['productname']}}</p>
-            <p><strong>Price</strong>: {{entry['price']}} dollarinos</p>
+            <p><strong>Price</strong>: €{{entry['price']}}</p>
           </div>
         </a>
       {% endfor %}

@@ -1,5 +1,8 @@
 from flask import Flask, render_template
 from testlibfile import testlib
+import sqlalchemy
+
+#add to requirements later?
 
 app = Flask(__name__)
 #"{{url_for('static', filename='images/r2.png')}}"
@@ -15,13 +18,13 @@ def test_site():
 
 @app.route("/productpage/<string:target_id>")
 def show_detail(target_id):
-
     for item in testlib:
         if item["id"]==target_id:
             target_item=item
             break
 
     return render_template('productpage.html', item=target_item)
+
 
 
 
