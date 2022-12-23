@@ -1,15 +1,29 @@
 from flask import Flask, render_template
 from testlibfile import testlib
-import sqlalchemy
+from flask_sqlalchemy import SQLAlchemy
+import os
 
 #add to requirements later?
 
+
+#partials html
+
+
 app = Flask(__name__)
-#"{{url_for('static', filename='images/r2.png')}}"
+env_config = os.getenv("APP_SETTINGS", "config.DevelopmentConfig")
+app.config.from_object(env_config)
+
+# secret_key = app.config.get("SECRET_KEY")
+# print(f"The configured secret key is {secret_key}.")
+#app.config.from_object(os.environ['APP_SETTINGS'])
+
+db = SQLAlchemy(app)
 
 @app.route("/")
 def index():
     return render_template('index.html',testlib=testlib)
+
+
 
 
 @app.route("/test")
@@ -18,13 +32,19 @@ def test_site():
 
 @app.route("/productpage/<string:target_id>")
 def show_detail(target_id):
+
     for item in testlib:
         if item["id"]==target_id:
             target_item=item
-            break
+            return render_template('productpage.html', item=target_item)
+    return render_template('error.html')
 
-    return render_template('productpage.html', item=target_item)
 
+
+#errors
+@app.errorhandler(404)
+def page_not_found(anything):
+    return render_template('error.html')
 
 
 
