@@ -1,4 +1,4 @@
-from main import db
+from app import db
 
 #alleen nodig voor json in column    db.Column(JSON)
 from sqlalchemy.dialects.postgresql import JSON

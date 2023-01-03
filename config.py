@@ -6,9 +6,12 @@ class Config(object):
     DEBUG = False
     TESTING = False
     CSRF_ENABLED = True
-    #SECRET_KEY = 'this-really-needs-to-be-changed'
-    SECRET_KEY = os.getenv("SECRET_KEY", "this-is-the-default-key")  #how to make it a secret on git?
+
+    #put these in environment variables?? will it work when someone downloads it from git?
+    SECRET_KEY = 'this-really-needs-to-be-changed'
     SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:Db25#@localhost/Db_online_shop'
+
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 

@@ -3,15 +3,16 @@ from testlibfile import testlib
 from flask_sqlalchemy import SQLAlchemy
 import os
 
-#add to requirements later?
-
 
 #partials html
 
 
 app = Flask(__name__)
+
+
 env_config = os.getenv("APP_SETTINGS", "config.DevelopmentConfig")
 app.config.from_object(env_config)
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
 
 # secret_key = app.config.get("SECRET_KEY")
 # print(f"The configured secret key is {secret_key}.")
@@ -19,11 +20,11 @@ app.config.from_object(env_config)
 
 db = SQLAlchemy(app)
 
+from models import Products
+
 @app.route("/")
 def index():
     return render_template('index.html',testlib=testlib)
-
-
 
 
 @app.route("/test")
@@ -46,8 +47,9 @@ def show_detail(target_id):
 def page_not_found(anything):
     return render_template('error.html')
 
-
+if __name__ == '__main__':
+    app.run()
 
 
 #makes it run, niet nodig tho  'flask --app main run' kan ook
-app.run(host='0.0.0.0', port=81)
+#app.run(host='0.0.0.0', port=81)
