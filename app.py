@@ -14,12 +14,11 @@ env_config = os.getenv("APP_SETTINGS", "config.DevelopmentConfig")
 app.config.from_object(env_config)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
 
-# secret_key = app.config.get("SECRET_KEY")
-# print(f"The configured secret key is {secret_key}.")
-#app.config.from_object(os.environ['APP_SETTINGS'])
 
 db = SQLAlchemy(app)
 
+
+#not runnable with this by the button, need to runserver instead
 from models import Products
 
 @app.route("/")
