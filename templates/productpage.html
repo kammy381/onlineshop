@@ -19,9 +19,9 @@
      <h1><strong>{{product['name']}}</strong></h1>
      <img src={{product.image_url}} alt="picture of a cube" width="300" height="300">
 
-     <p><strong>Price</strong>: €{{product['price']}}</p>
-     <p><strong>Description</strong>: {{product['description']}} </p>
-     <p><strong>This product was posted at:</strong>: {{product['created_at']}} </p>
+     <p><strong>Price:</strong> €{{'%.2f' % product['price']}}</p>
+     <p><strong>Description:</strong> {{product['description']}} </p>
+     <p><strong>This product was posted at: </strong>{{product['created_at']}} </p>
 
  </div>
 

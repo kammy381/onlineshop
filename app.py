@@ -4,10 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 import os
 from datetime import datetime
 
-
-
 #partials html
-
 
 app = Flask(__name__)
 
@@ -23,7 +20,7 @@ from models import Products
 
 @app.route("/")
 def index():
-    products=db.session.query(Products).all() #make it so it's not all but first x
+    products=db.session.query(Products).limit(12).all()
     return render_template('index.html', products=products)
 
 
@@ -47,20 +44,19 @@ def submit():
         db.session.add(product)
         db.session.commit()
 
-        products = db.session.query(Products).all()
+        products = db.session.query(Products).limit(12).all()
     return render_template('index.html',products=products)
 
 
-###broken
+
 @app.route("/productpage/<string:target_id>")
 def show_detail(target_id):
-    products = db.session.query(Products).all()
-    for product in products:
-
-        if product==target_id:
-            target_item=product
-            return render_template('productpage.html', product=target_item)
-    return render_template('error.html')
+    product = db.session.query(Products).filter(Products.id==target_id).first()
+    try:
+        x=product.name
+        return render_template('productpage.html', product=product)
+    except AttributeError:
+        return render_template('error.html')
 
 
 
