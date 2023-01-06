@@ -20,16 +20,16 @@ class Products(db.Model):
     order_lines = db.relationship('Order_lines', backref='product')
 
     #runs when we create a new one
-    def __init__(self, id, name, price, image_url, description, created_at, updated_at, cart_items, order_lines):
-        self.id = id
+    def __init__(self, name, price, image_url, description, created_at, updated_at):
+        #self.id = id
         self.name = name
         self.price = price
         self.image_url = image_url
         self.description = description
         self.created_at = created_at
         self.updated_at = updated_at
-        self.cart_items = cart_items
-        self.order_lines=order_lines
+        # self.cart_items = cart_items
+        # self.order_lines=order_lines
 
     #represents object when we query for it
     def __repr__(self):
@@ -47,8 +47,8 @@ class Cart_items(db.Model):
 
 
     #runs when we create a new one
-    def __init__(self, id, product_id,cart_id, quantity, created_at, updated_at):
-        self.id=id
+    def __init__(self, product_id,cart_id, quantity, created_at, updated_at):
+        #self.id=id
         self.product_id = product_id
         self.cart_id = cart_id
         self.quantity = quantity
@@ -73,14 +73,14 @@ class Carts(db.Model):
 
 
     # runs when we create a new one
-    def __init__(self, id, full_name, user_id, created_at, updated_at, cart_items):
-        self.id = id
+    def __init__(self, full_name, user_id, created_at, updated_at):
+        #self.id = id
         self.full_name = full_name
         self.user_id = user_id
         self.created_at = created_at
         self.updated_at = updated_at
 
-        self.cart_items=cart_items
+        #self.cart_items=cart_items
 
     # represents object when we query for it
     def __repr__(self):
@@ -98,8 +98,8 @@ class Order_lines(db.Model):
     updated_at = db.Column(db.DateTime)
 
     # runs when we create a new one
-    def __init__(self, id, product_id, cart_id, quantity, price_per_unit, created_at, updated_at):
-        self.id=id
+    def __init__(self, product_id, cart_id, quantity, price_per_unit, created_at, updated_at):
+        #self.id=id
         self.product_id = product_id
         self.cart_id = cart_id
         self.quantity = quantity
@@ -124,14 +124,14 @@ class Orders(db.Model):
     payments = db.relationship('Payments', backref='orders', uselist=False)
 
     # runs when we create a new one
-    def __init__(self, id, full_name, user_id, created_at, updated_at, cart_ids, payments):
-        self.id = id
+    def __init__(self, full_name, user_id, created_at, updated_at):
+        #self.id = id
         self.full_name = full_name
         self.user_id = user_id
         self.created_at = created_at
         self.updated_at = updated_at
-        self.cart_ids = cart_ids
-        self.payments = payments
+        # self.cart_ids = cart_ids
+        # self.payments = payments
 
     # represents object when we query for it
     def __repr__(self):
@@ -155,8 +155,8 @@ class Users(db.Model):
     payments = db.relationship('Payments', backref='user', uselist=False)
 
     # runs when we create a new one
-    def __init__(self, id, email, password, adress, postal_code, city, country, created_at, updated_at, orders, carts, payments):
-        self.id = id
+    def __init__(self, email, password, adress, postal_code, city, country, created_at, updated_at):
+        #self.id = id
         self.email = email
         self.password = password
         self.adress = adress
@@ -165,9 +165,9 @@ class Users(db.Model):
         self.country = country
         self.created_at = created_at
         self.updated_at = updated_at
-        self.orders=orders
-        self.carts=carts
-        self.payments=payments
+        # self.orders=orders
+        # self.carts=carts
+        # self.payments=payments
 
     # represents object when we query for it
     def __repr__(self):
@@ -185,8 +185,8 @@ class Payments(db.Model):
     updated_at = db.Column(db.DateTime)
 
     # runs when we create a new one
-    def __init__(self, id, amount, order_id, user_id, status, created_at, updated_at):
-        self.id = id
+    def __init__(self, amount, order_id, user_id, status, created_at, updated_at):
+        #self.id = id
         self.amount = amount
         self.order_id = order_id
         self.user_id = user_id

@@ -1,7 +1,9 @@
-from flask import Flask, render_template
-from testlibfile import testlib
+from flask import Flask, render_template, request
+
 from flask_sqlalchemy import SQLAlchemy
 import os
+from datetime import datetime
+
 
 
 #partials html
@@ -17,26 +19,47 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
 
 db = SQLAlchemy(app)
 
-
-#not runnable with this by the button, need to runserver instead
 from models import Products
 
 @app.route("/")
 def index():
-    return render_template('index.html',testlib=testlib)
+    products=db.session.query(Products).all() #make it so it's not all but first x
+    return render_template('index.html', products=products)
 
 
 @app.route("/test")
 def test_site():
     return render_template('test.html')
 
+@app.route('/submitproduct', methods=['POST'])
+def submit():
+
+    if request.method=="POST":
+
+        name = request.form['productname']
+        price = request.form['price']
+        image_url = request.form['pictureurl']
+        description = request.form['description']
+        created_at=datetime.now()
+        updated_at=datetime.now()
+
+        product = Products(name,price,image_url,description,created_at,updated_at)
+        db.session.add(product)
+        db.session.commit()
+
+        products = db.session.query(Products).all()
+    return render_template('index.html',products=products)
+
+
+###broken
 @app.route("/productpage/<string:target_id>")
 def show_detail(target_id):
+    products = db.session.query(Products).all()
+    for product in products:
 
-    for item in testlib:
-        if item["id"]==target_id:
-            target_item=item
-            return render_template('productpage.html', item=target_item)
+        if product==target_id:
+            target_item=product
+            return render_template('productpage.html', product=target_item)
     return render_template('error.html')
 
 

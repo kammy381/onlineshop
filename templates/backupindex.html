@@ -53,35 +53,21 @@
         </div>
       </div>
     </nav>
+
   <div>
     <br>
     <h2>Products</h2>
     <div class="mygridcontainer">
-      {% for product in products %}
-        <a href="{{ url_for('show_detail',target_id=product['id']) }}" style="text-decoration: none; " >
+      {% for entry in testlib %}
+        <a href="{{ url_for('show_detail',target_id=entry['id']) }}" style="text-decoration: none; " >
           <div class="mygriditem">
-            <img src={{product.image_url}} alt="picture of a cube" width="300" height="300">
-            <p><strong>Product name</strong>: {{product['name']}}</p>
-            <p><strong>Price</strong>: €{{product['price']}}</p>
+            <img src="/static/images/{{entry['image']}}" alt="picture of a cube" width="300" height="300">
+            <p><strong>Product name</strong>: {{entry['productname']}}</p>
+            <p><strong>Price</strong>: €{{entry['price']}}</p>
           </div>
         </a>
       {% endfor %}
     </div>
-
-  </div>
-  <div>
-    <form action="/submitproduct" method="POST">
-      <label for="productname">Product Name:</label><br>
-      <input type="text" id="productname" name="productname"><br><br>
-      <label for="price">Price:</label><br>
-      <input type="text" id="price" name="price"><br><br>
-      <label for="pictureurl">Link to image:</label><br>
-      <input type="text" id="pictureurl" name="pictureurl"><br><br>
-      <label for="description">Product description:</label><br>
-      <input type="text" id="description" name="description"><br><br>
-      <button><a>Submit</a></button><br>
-
-    </form>
 
   </div>
 
