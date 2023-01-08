@@ -60,21 +60,11 @@
       </div>
     </nav>
   <div>
-    <br>
-    <h2>Products</h2>
-    <div class="mygridcontainer">
-      {% for product in products %}
-        <a href="{{ url_for('show_detail',target_id=product['id']) }}" style="text-decoration: none; " >
-          <div class="mygriditem">
-            <img src={{product.image_url}} alt="picture of a cube" width="300" height="300">
-            <p><strong>Product name</strong>: {{product['name']}}</p>
-            <p><strong>Price</strong>: €{{'%.2f' % product['price'] }}</p>
-          </div>
-        </a>
-      {% endfor %}
-    </div>
+
+      <img src="{{url_for('static', filename='images/cry.gif')}}" >
 
   </div>
 
   </body>
 </html>
+

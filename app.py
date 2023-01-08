@@ -20,13 +20,17 @@ from models import Products
 
 @app.route("/")
 def index():
-    products=db.session.query(Products).limit(12).all()
+    products=db.session.query(Products).limit(30).all()
     return render_template('index.html', products=products)
 
 
-@app.route("/test")
-def test_site():
-    return render_template('test.html')
+@app.route("/howtosolve")
+def how_to_solve():
+    return render_template('howtosolve.html')
+
+@app.route("/addproduct")
+def add_a_product():
+    return render_template('addproduct.html')
 
 @app.route('/submitproduct', methods=['POST'])
 def submit():
@@ -44,9 +48,18 @@ def submit():
         db.session.add(product)
         db.session.commit()
 
-        products = db.session.query(Products).limit(12).all()
+        products = db.session.query(Products).limit(30).all()
     return render_template('index.html',products=products)
 
+@app.route('/search', methods=['POST'])
+def search():
+
+    if request.method=="POST":
+        searched=request.form['searched']
+
+
+        products = db.session.query(Products).filter(Products.name.contains(searched)).all()
+    return render_template('index.html',products=products)
 
 
 @app.route("/productpage/<string:target_id>")
