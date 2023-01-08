@@ -1,12 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Error</title>
-</head>
-<body>
+{% extends "layout.html" %}
+{% block title %}Error{% endblock %}
+{% block head %}
+  {{ super() }}
+
+{% endblock %}
+{% block content %}
   <h1>Page not found</h1>
 
-  <a href="/">Homepage</a>
-</body>
-</html>
+  <a href="/">Return to Homepage</a>
+{% endblock %}

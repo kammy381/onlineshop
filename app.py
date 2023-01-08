@@ -4,7 +4,6 @@ from flask_sqlalchemy import SQLAlchemy
 import os
 from datetime import datetime
 
-#partials html
 
 app = Flask(__name__)
 
@@ -82,5 +81,5 @@ if __name__ == '__main__':
     app.run()
 
 
-#makes it run, niet nodig tho  'flask --app main run' kan ook
+
 #app.run(host='0.0.0.0', port=81)
