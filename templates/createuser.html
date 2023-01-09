@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+
+{% block title %}   Create User  {% endblock %}
+
+
+{% block head %}
+  {{ super() }}
+
+
+{% endblock %}
+
+
+
+{% block content %}
+  <div>
+    <br>
+    <form action="/createuser" method="POST">
+      <label for="email" class="form-label">Email:</label><br>
+      <input type="text" class="form-control" id="email" name="email"><br>
+      <label for="password" class="form-label">Password:</label><br>
+      <input type="text" class="form-control" id="password" name="password"><br>
+      <label for="adress" class="form-label">Adress:</label><br>
+      <input type="text" class="form-control" id="adress" name="adress"><br>
+      <label for="postal_code" class="form-label">Postal code:</label><br>
+      <input type="text" class="form-control" id="postal_code" name="postal_code"><br>
+      <label for="city" class="form-label">City:</label><br>
+      <input type="text" class="form-control" id="city" name="city"><br>
+      <label for="country" class="form-label">Country:</label><br>
+      <input type="text" class="form-control" id="country" name="country"><br>
+      <button class="btn btn-primary"><a>Submit</a></button><br>
+
+    </form>
+
+  </div>
+{% endblock %}

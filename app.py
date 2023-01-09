@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request
-
+from wtforms import StringField, SubmitField
+from wtforms.validators import DataRequired
 from flask_sqlalchemy import SQLAlchemy
 import os
 from datetime import datetime
@@ -15,7 +16,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
 
 db = SQLAlchemy(app)
 
-from models import Products
+from models import Products, Users
 
 @app.route("/")
 def index():
@@ -31,8 +32,12 @@ def how_to_solve():
 def add_a_product():
     return render_template('addproduct.html')
 
+@app.route('/adduser')
+def add_a_user():
+    return render_template('createuser.html')
+
 @app.route('/submitproduct', methods=['POST'])
-def submit():
+def submit_product():
 
     if request.method=="POST":
 
@@ -49,6 +54,30 @@ def submit():
 
         products = db.session.query(Products).limit(30).all()
     return render_template('index.html',products=products)
+
+@app.route('/createuser', methods=['POST'])
+def create_user():
+
+    if request.method=="POST":
+
+        email = request.form['email']
+        password = request.form['password']
+        adress = request.form['adress']
+        postal_code = request.form['postal_code']
+        city = request.form['city']
+        country = request.form['country']
+        created_at = datetime.now()
+        updated_at = datetime.now()
+
+
+
+        user = Users(email,password,adress,postal_code,city,country,created_at,updated_at)
+        db.session.add(user)
+        db.session.commit()
+
+        users = db.session.query(Users).all()
+
+    return render_template('index.html',user=users)
 
 @app.route('/search', methods=['POST'])
 def search():
