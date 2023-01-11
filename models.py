@@ -1,4 +1,6 @@
 from app import db
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
 
 #alleen nodig voor json in column    db.Column(JSON)
 from sqlalchemy.dialects.postgresql import JSON
@@ -137,13 +139,15 @@ class Orders(db.Model):
     def __repr__(self):
         return '<oder_id {}>'.format(self.id)
 
-class Users(db.Model):
+class Users(db.Model, UserMixin):
     __tablename__ = 'user'
 
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(50), nullable=False)
-    password = db.Column(db.String(100), nullable=False)  #how to hash? yt
-    adress = db.Column(db.String(100), nullable=False)
+    username = db.Column(db.String(30), nullable=False, unique=True)
+    email = db.Column(db.String(50), nullable=False, unique=True)
+    password_hash = db.Column(db.String(100), nullable=False)
+
+    address = db.Column(db.String(100), nullable=False)
     postal_code = db.Column(db.String(20), nullable=False)
     city = db.Column(db.String(100), nullable=False)
     country = db.Column(db.String(100), nullable=False)
@@ -154,12 +158,23 @@ class Users(db.Model):
     carts = db.relationship('Carts', backref='user', uselist=False)
     payments = db.relationship('Payments', backref='user', uselist=False)
 
+    @property
+    def password(self):
+        raise AttributeError('password is not a readable attribute')
+    @password.setter
+    def password(self,password):
+        self.password_hash = generate_password_hash(password)
+
+    def verify_password(self,password):
+        return check_password_hash(self.password_hash, password)
+
     # runs when we create a new one
-    def __init__(self, email, password, adress, postal_code, city, country, created_at, updated_at):
+    def __init__(self,username, email, password_hash, address, postal_code, city, country, created_at, updated_at):
         #self.id = id
+        self.username = username
         self.email = email
-        self.password = password
-        self.adress = adress
+        self.password_hash = password_hash
+        self.address = address
         self.postal_code = postal_code
         self.city = city
         self.country = country

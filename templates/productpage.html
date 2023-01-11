@@ -5,6 +5,17 @@
 
 {% endblock %}
 {% block content %}
+<br>
+{% for message in get_flashed_messages() %}
+
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+  <strong>{{ message }}</strong>
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+
+{% endfor %}
+
+
 <h1>Product Details</h1>
 
  <div class="mygriditem">
@@ -14,6 +25,7 @@
      <p><strong>Price:</strong> €{{'%.2f' % product['price']}}</p>
      <p><strong>Description:</strong> {{product['description']}} </p>
      <p><strong>This product was posted at: </strong>{{product['created_at']}} </p>
+     <a class="btn btn-primary" href="{{ url_for('update_product', id=product.id)}}"> Edit </a>
 
  </div>
 {% endblock %}

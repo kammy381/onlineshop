@@ -1,29 +1,48 @@
 {% extends "layout.html" %}
-{% block title %}Add a product{% endblock %}
+
+
+{% block title %}   Add a product   {% endblock %}
+
+
 {% block head %}
   {{ super() }}
 
+
 {% endblock %}
+
 {% block content %}
-  <div>
-    <br>
-    <form action="/submitproduct" method="POST">
-      <label for="productname" class="form-label">Product Name:</label><br>
-      <input type="text" class="form-control" id="productname" name="productname"><br>
-      <label for="price" class="form-label">Price:</label><br>
-      <input type="text" class="form-control" id="price" name="price"><br>
-      <label for="pictureurl" class="form-label">Link to image:</label><br>
-      <input type="text" class="form-control" id="pictureurl" name="pictureurl"><br>
-      <label for="description" class="form-label">Product description:</label><br>
-      <input type="text" class="form-control" id="description" name="description"><br>
-      <button class="btn btn-primary"><a>Submit</a></button><br>
 
-    </form>
+<br>
+{% for message in get_flashed_messages() %}
 
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+  <strong>{{ message }}</strong>
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
   </div>
+
+{% endfor %}
+
+<br>
+<h1>Add product</h1>
+<div class="shadow p-3 mb-5 bg-body rounded">
+  <form method="POST">
+    {{ form.hidden_tag() }}
+
+    {{ form.name.label(class="form-label") }}
+    {{ form.name(class="form-control" ) }}
+    <br>
+    {{ form.price.label(class="form-label") }}
+    {{ form.price(class="form-control" ) }}
+    <br>
+    {{ form.image_url.label(class="form-label") }}
+    {{ form.image_url(class="form-control" ) }}
+    <br>
+    {{ form.description.label(class="form-label") }}
+    {{ form.description(class="form-control", rows="7" ) }}
+    <br>
+    {{ form.submit(class="btn btn-primary") }}
+
+  </form>
+</div>
+
 {% endblock %}
-
-
-
-
-

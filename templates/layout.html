@@ -28,15 +28,29 @@
             <li class="nav-item">
               <a class="nav-link active" aria-current="page" href="/">Home</a>
             </li>
+            <!-- remove active to make the button grey -->
             <li class="nav-item">
-              <a class="nav-link" href="/howtosolve">How to solve</a>
+              <a class="nav-link active" href="/howtosolve">How to solve</a>
+            </li>
+            {% if current_user.is_authenticated %}
+            <li class="nav-item">
+              <a class="nav-link active" href="{{ url_for('logout') }}">Logout</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="/adduser">New user</a>
+              <a class="nav-link active" href="/addproduct">Add a product</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="/addproduct">Add a product</a>
+              <a class="nav-link active" href="/dashboard">Dashboard</a>
             </li>
+            {% else %}
+            <li class="nav-item">
+              <a class="nav-link active" href="/login">Login</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="/createuser">New user</a>
+            </li>
+            {% endif %}
+<!--
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                 Dropdown
@@ -48,10 +62,9 @@
                 <li><a class="dropdown-item" href="#">Something else here</a></li>
               </ul>
             </li>
-            <li class="nav-item">
-              <a class="nav-link disabled">Disabled</a>
-            </li>
+-->
           </ul>
+
           <form method="POST" action="/search" class="d-flex" role="search" >
             <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="searched">
             <button type="submit" class="btn btn-outline-light">Search</button>
