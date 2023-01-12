@@ -22,9 +22,10 @@
      <h1><strong>{{product['name']}}</strong></h1>
      <img src={{product.image_url}} alt="picture of a cube" style="max-height:300px;max-width:250px;height:auto;width:auto;">
 
-     <p><strong>Price:</strong> €{{'%.2f' % product['price']}}</p>
-     <p><strong>Description:</strong> {{product['description']}} </p>
-     <p><strong>This product was posted at: </strong>{{product['created_at']}} </p>
+     <p><strong>Price:</strong> €{{'%.2f' % product.price}}</p>
+     <p><strong>Description: </strong>{{product.description}} </p>
+     <p><strong>Added by user: </strong>{{ product.user.username }}</p>
+     <p><strong>Posted at: </strong>{{product.created_at }} </p>
      {% if current_user.is_authenticated %}
      <a class="btn btn-primary" href="{{ url_for('update_product', id=product.id)}}"> Edit </a>
 

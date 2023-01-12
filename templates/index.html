@@ -27,8 +27,8 @@
         <a href="{{ url_for('show_detail',target_id=product['id']) }}" style="text-decoration: none; " >
           <div class="mygriditem">
             <img src={{product.image_url}} alt="picture of a cube" style="max-height:300px;max-width:250px;height:auto;width:auto;">
-            <p><strong>Product name</strong>: {{product['name']}}</p>
-            <p><strong>Price</strong>: €{{'%.2f' % product['price'] }}</p>
+            <p><strong>Product name</strong>: {{product.name}}</p>
+            <p><strong>Price</strong>: €{{'%.2f' % product.price }}</p>
           </div>
         </a>
       {% endfor %}

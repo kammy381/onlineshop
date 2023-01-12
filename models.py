@@ -16,13 +16,16 @@ class Products(db.Model):
     description = db.Column(db.Text)
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
+    #posted by
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+
 
     ##
     cart_items = db.relationship('Cart_items', backref='product')
     order_lines = db.relationship('Order_lines', backref='product')
 
     #runs when we create a new one
-    def __init__(self, name, price, image_url, description, created_at, updated_at):
+    def __init__(self, name, price, image_url, description, created_at, updated_at, user_id):
         #self.id = id
         self.name = name
         self.price = price
@@ -30,6 +33,7 @@ class Products(db.Model):
         self.description = description
         self.created_at = created_at
         self.updated_at = updated_at
+        self.user_id = user_id
         # self.cart_items = cart_items
         # self.order_lines=order_lines
 
@@ -154,6 +158,8 @@ class Users(db.Model, UserMixin):
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
 
+    #is user ok? or different name?
+    products = db.relationship('Products', backref='user')
     orders = db.relationship('Orders', backref='user')
     carts = db.relationship('Carts', backref='user', uselist=False)
     payments = db.relationship('Payments', backref='user', uselist=False)

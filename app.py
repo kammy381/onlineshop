@@ -155,7 +155,7 @@ def product_form():
 
     form = ProductForm()
     if form.validate_on_submit():
-
+        user_id = current_user.id
         name = form.name.data
         price = form.price.data
         image_url = form.image_url.data
@@ -163,7 +163,7 @@ def product_form():
         created_at=datetime.now()
         updated_at=datetime.now()
 
-        product = Products(name,price,image_url,description,created_at,updated_at)
+        product = Products(name,price,image_url,description,created_at,updated_at, user_id)
         db.session.add(product)
         db.session.commit()
 
