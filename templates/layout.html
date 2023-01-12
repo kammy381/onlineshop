@@ -18,36 +18,39 @@
         <a class="navbar-brand" href="/">
           <img class="static" src="{{url_for('static', filename='images/static-spin.gif')}}" width="40" height="40" class="d-inline-block align-top" alt="" >
           <img class="active" src="{{url_for('static', filename='images/spin.gif')}}" width="40" height="40" class="d-inline-block align-top" alt="">
-          PuzzleCube
+          <strong style="font-size: 20px; color:white">PuzzleCube</strong>
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <!--
             <li class="nav-item">
               <a class="nav-link active" aria-current="page" href="/">Home</a>
             </li>
+            -->
+
             <!-- remove active to make the button grey -->
             <li class="nav-item">
-              <a class="nav-link active" href="/howtosolve">How to solve</a>
+              <a class="nav-link active" href="/howtosolve"><strong style="font-size: 17px; color:white">How to solve</strong></a>
             </li>
             {% if current_user.is_authenticated %}
             <li class="nav-item">
-              <a class="nav-link active" href="{{ url_for('logout') }}">Logout</a>
+              <a class="nav-link active" href="{{ url_for('logout') }}"><strong style="font-size: 17px; color:white">Logout</strong></a>
             </li>
             <li class="nav-item">
-              <a class="nav-link active" href="/addproduct">Add a product</a>
+              <a class="nav-link active" href="/addproduct"><strong style="font-size: 17px; color:white">Add a product</strong></a>
             </li>
             <li class="nav-item">
-              <a class="nav-link active" href="/dashboard">Dashboard</a>
+              <a class="nav-link active" href="/dashboard"><strong style="font-size: 17px; color:white">Dashboard</strong></a>
             </li>
             {% else %}
             <li class="nav-item">
-              <a class="nav-link active" href="/login">Login</a>
+              <a class="nav-link active" href="/login"><strong style="font-size: 17px; color:white">Login</strong></a>
             </li>
             <li class="nav-item">
-              <a class="nav-link active" href="/createuser">New user</a>
+              <a class="nav-link active" href="/createuser"><strong style="font-size: 17px; color:white">New user</strong></a>
             </li>
             {% endif %}
 <!--

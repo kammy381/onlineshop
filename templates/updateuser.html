@@ -24,11 +24,13 @@
 
   <div>
     <br>
+    {% if id==current_user.id %}
     <h1>Update account</h1>
     <div class="shadow p-3 mb-5 bg-body rounded">
       <form action="/updateuser/{{ thing_to_update.id }}" method="POST">
         {{ form.hidden_tag() }}
 
+        <br>
         {{ form.username.label(class="form-label") }}
         {{ form.username(class="form-control", value=thing_to_update.username  ) }}
         <br>
@@ -55,9 +57,12 @@
         <br>
         {{ form.submit(class="btn btn-primary") }}
 
-        <a href="{{ url_for('delete_user', id=thing_to_update.id) }}" class="btn btn-danger"> Delete account</a>
+        <a href="{{ url_for('delete_user', id=thing_to_update.id) }}" class="btn btn-danger float-end"> Delete account</a>
 
       </form>
     </div>
+    {% else %}
+    <h1>You can't edit this user!</h1>
+    {% endif %}
   </div>
 {% endblock %}

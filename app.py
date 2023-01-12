@@ -1,14 +1,10 @@
 from flask import Flask, render_template, flash, request, redirect, url_for
-from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, DecimalField, TextAreaField, PasswordField, BooleanField,ValidationError
-from wtforms.validators import DataRequired, NumberRange, URL, Email, EqualTo, Length
-from wtforms.widgets import TextArea
 from flask_sqlalchemy import SQLAlchemy
 import os
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
-
+from webforms import ProductForm, UserForm, LoginForm
 
 app = Flask(__name__)
 
@@ -32,31 +28,6 @@ login_manager.login_view='login'
 def load_user(user_id):
     return Users.query.get(int(user_id))
 
-##form class
-class ProductForm(FlaskForm):
-    name = StringField("Product name:", validators=[DataRequired()])
-    price = DecimalField("Price:", validators=[DataRequired(), NumberRange(min=0.01,max=99999)])
-    image_url = StringField("Image url:", validators=[URL(message='wrong url')])
-    description = StringField("Product description:", validators=[DataRequired()], widget=TextArea())
-    submit = SubmitField("Submit")
-
-class UserForm(FlaskForm):
-    username = StringField("Username:", validators=[DataRequired()])
-    email = StringField("Email:", validators=[DataRequired(), Email()])
-    password_hash = PasswordField("Password:", validators=[DataRequired(), EqualTo('password_hash2', message='Passwords must match!')])
-    password_hash2 = PasswordField("Confirm Password", validators=[DataRequired()])
-    address = StringField("Address:", validators=[DataRequired()])
-    postal_code = StringField("Postalcode:", validators=[DataRequired()])
-    city = StringField('City:', validators=[DataRequired()])
-    country = StringField('Country:', validators=[DataRequired()])
-    submit = SubmitField("Submit")
-
-
-
-class LoginForm(FlaskForm):
-    username = StringField("Username:", validators=[DataRequired()])
-    password = PasswordField("Password:", validators=[DataRequired()])
-    submit = SubmitField("Submit")
 
 
 @app.route('/login', methods=["GET","POST"])
@@ -127,6 +98,7 @@ def user_form():
             form.country.data = ''
 
             flash("Great Succes!  Account created succesfully")
+            return redirect(url_for('login'))
         else:
             flash("This email is already in use!")
 
@@ -134,6 +106,7 @@ def user_form():
     return render_template('createuser.html', form=form, users=users)
 
 @app.route('/updateuser/<int:id>', methods=['GET','POST'])
+@login_required
 def update_user(id):
     form = UserForm()
     thing_to_update= Users.query.get_or_404(id)
@@ -149,14 +122,15 @@ def update_user(id):
         try:
             db.session.commit()
             flash("Userprofile updated!")
-            return render_template('updateuser.html', form=form, thing_to_update=thing_to_update)
+            return render_template('updateuser.html', form=form, thing_to_update=thing_to_update, id=id)
         except:
             flash("Something went wrong :(")
-            return render_template('updateuser.html', form=form, thing_to_update=thing_to_update)
+            return render_template('updateuser.html', form=form, thing_to_update=thing_to_update, id=id)
     else:
-        return render_template('updateuser.html', form=form, thing_to_update=thing_to_update)
+        return render_template('updateuser.html', form=form, thing_to_update=thing_to_update, id=id)
 
 @app.route('/deleteuser/<int:id>')
+@login_required
 def delete_user(id):
     user_to_delete = Users.query.get_or_404(id)
 
@@ -172,6 +146,7 @@ def delete_user(id):
         return render_template('createuser.html', form=form, users=users)
 
 @app.route("/addproduct", methods=['GET','POST'])
+@login_required
 def product_form():
     name = None
     price = None
@@ -201,6 +176,7 @@ def product_form():
 
     return render_template('addproduct.html', form=form)
 @app.route('/updateproduct/<int:id>', methods=['GET','POST'])
+@login_required
 def update_product(id):
     form = ProductForm()
     thing_to_update= Products.query.get_or_404(id)
@@ -224,25 +200,8 @@ def update_product(id):
     form.description.data=thing_to_update.description
     return render_template('updateproduct.html', form=form, thing_to_update=thing_to_update)
 
-    # if request.method =='POST':
-    #
-    #     thing_to_update.name=request.form['name']
-    #     thing_to_update.price = request.form['price']
-    #     thing_to_update.image_url = request.form['image_url']
-    #     thing_to_update.description = request.form['description']
-    #     thing_to_update.updated_at = datetime.now()
-    #     try:
-    #         db.session.commit()
-    #         flash("Product updated!")
-    #         return render_template('updateproduct.html', form=form, thing_to_update=thing_to_update)
-    #     except:
-    #         flash("Something went wrong :(")
-    #         return render_template('updateproduct.html', form=form, thing_to_update=thing_to_update)
-    # else:
-    #     return render_template('updateproduct.html', form=form, thing_to_update=thing_to_update)
-
-
 @app.route('/deleteproduct/<int:id>')
+@login_required
 def delete_product(id):
     product_to_delete = Products.query.get_or_404(id)
 

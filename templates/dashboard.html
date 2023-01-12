@@ -33,7 +33,8 @@
   <strong>Date created:</strong> {{ current_user.created_at }} <br>
   <br>
   <a href="{{url_for('logout')}}" class="btn btn-primary">Logout</a>
-  <a href="{{url_for('delete_user', id=current_user.id)}}" class="btn btn-danger">Delete Account</a>
+  <a href="{{url_for('update_user', id=current_user.id)}}" class="btn btn-warning">Edit Account</a>
+  <a href="{{url_for('delete_user', id=current_user.id)}}" class="btn btn-danger float-end">Delete Account</a>
 </div>
 
 
