@@ -20,7 +20,7 @@
 
  <div class="mygriditem">
      <h1><strong>{{product['name']}}</strong></h1>
-     <img src={{product.image_url}} alt="picture of a cube" width="300" height="300">
+     <img src={{product.image_url}} alt="picture of a cube" style="max-height:300px;max-width:250px;height:auto;width:auto;">
 
      <p><strong>Price:</strong> €{{'%.2f' % product['price']}}</p>
      <p><strong>Description:</strong> {{product['description']}} </p>
