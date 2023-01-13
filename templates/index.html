@@ -7,6 +7,7 @@
 
 
 {% block content %}
+
 <br>
 {% for message in get_flashed_messages() %}
 
@@ -17,20 +18,22 @@
 
 {% endfor %}
 
-
-
   <br>
 
     <h2>Products</h2>
     <div class="mygridcontainer">
       {% for product in products %}
-        <a href="{{ url_for('show_detail',target_id=product['id']) }}" style="text-decoration: none; " >
-          <div class="mygriditem">
-            <img src={{product.image_url}} alt="picture of a cube" style="max-height:300px;max-width:250px;height:auto;width:auto;">
-            <p><strong>Product name</strong>: {{product.name}}</p>
-            <p><strong>Price</strong>: €{{'%.2f' % product.price }}</p>
-          </div>
-        </a>
+
+      <div class="card " style="width: 18rem;">
+        <img src={{product.image_url}} class="card-img-top" alt="cube image" style="max-height:250px;max-width:250px; display: block; margin-left:auto; margin-right:auto; height:auto;width:auto;">
+        <div class="card-header"><h5 style="text-align: center">{{product.name}}</h5></div>
+        <div class="card-body">
+          <p style=" --max-lines: 3; --line-height: 1.4; max-height: calc(var(--max-lines) * 1em * var(--line-height)); line-height: var(--line-height); text-overflow: ellipsis; overflow: hidden; " >{{product.description}}</p>
+          <p> <strong>Price: </strong>€{{'%.2f' % product.price }}</p>
+          <a href="{{ url_for('show_detail',target_id=product['id']) }}" class="btn btn-primary float-end ">Details</a>
+        </div>
+      </div>
+
       {% endfor %}
     </div>
 

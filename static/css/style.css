@@ -1,11 +1,3 @@
-.mygriditem {
-    padding: 10px;
-    background-color: lightblue;
-    border-radius: 15px 30px;
-    text-align: center;
-    max-width: 300px;
-    margin: 20px
-}
 
 
 .mygridcontainer {
@@ -18,7 +10,6 @@
 }
 
 
-
 .static {
   position:absolute;
   background: lightblue;
@@ -27,6 +18,5 @@
 .static:hover {
   opacity:0;
 }
-
 
 
