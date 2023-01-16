@@ -7,11 +7,7 @@ from app import app, db
 env_config = os.getenv("APP_SETTINGS", "config.DevelopmentConfig")
 app.config.from_object(env_config)
 
-#toch environ?
-#app.config.from_object(os.environ['APP_SETTINGS'])
 
-#
-#
 migrate = Migrate(app, db)
 manager = Manager(app)
 
