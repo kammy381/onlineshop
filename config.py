@@ -1,15 +1,15 @@
 import os
 basedir = os.path.abspath(os.path.dirname(__file__))
-
+from dotenv import load_dotenv
+load_dotenv()
 
 class Config(object):
     DEBUG = False
     TESTING = False
     CSRF_ENABLED = True
 
-    #put these in environment variables?? will it work when someone downloads it from git?
-    SECRET_KEY = 'this-really-needs-to-be-changed'
-    SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:Db25#@localhost/Db_online_shop'
+    SECRET_KEY = os.getenv("SECRET_KEY")
+    SQLALCHEMY_DATABASE_URI = os.getenv("SECRET_URI")
 
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
