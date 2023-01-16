@@ -29,6 +29,7 @@
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             &emsp;
             <form method="POST" action="/search" class="d-flex" role="search" >
+            {{ form.hidden_tag() }}
             <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="searched">
             <button type="submit" class="btn btn-outline-light">Search</button>
             </form>

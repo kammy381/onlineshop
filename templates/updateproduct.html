@@ -46,6 +46,9 @@
         <a href="{{ url_for('delete_product', id=thing_to_update.id) }}" class="btn btn-danger"> Delete Product</a>
 
       </form>
+      {{ ckeditor.load() }}
+      {{ ckeditor.config(name='description') }}
+
     </div>
   </div>
 {% endblock %}
