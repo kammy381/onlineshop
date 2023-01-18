@@ -257,6 +257,10 @@ def how_to_solve():
 def timer():
     return render_template('timer.html')
 
+@app.route("/aboutme")
+def about_me():
+    return render_template('aboutme.html')
+
 @app.route("/shoppingcart")
 def shoppingcart():
     return render_template('shoppingcart.html')
@@ -287,16 +291,18 @@ def show_detail(target_id):
     if product is None:
         return render_template('error.html')
     else:
+
         return render_template('productpage.html', product=product)
 
-@app.route("/productpage/<string:target_id>")
+@app.route("/productpage/<string:target_id>/add_to_cart")
 def add_to_cart(target_id):
     product = db.session.query(Products).filter(Products.id == target_id).first()
+
     if product is None:
         return render_template('error.html')
     else:
-        flash('added to cart')  #f'{product.name}
-        return render_template('productpage.html', product=product)
+        flash(f'{product.name} has been added to your cart')
+        return redirect(url_for('show_detail', target_id=product.id))
 
 
 #errors

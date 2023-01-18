@@ -43,7 +43,7 @@
         <br>
         {{ form.submit(class="btn btn-primary") }}
 
-        <a href="{{ url_for('delete_product', id=thing_to_update.id) }}" class="btn btn-danger"> Delete Product</a>
+        <a href="{{ url_for('delete_product', id=thing_to_update.id) }}" class="btn btn-danger float-end"> Delete Product</a>
 
       </form>
       {{ ckeditor.load() }}
