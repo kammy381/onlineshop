@@ -8,6 +8,7 @@ from webforms import ProductForm, UserForm, LoginForm, SearchForm
 from flask_ckeditor import CKEditor
 
 
+
 app = Flask(__name__)
 
 #rich text editor init
@@ -109,7 +110,7 @@ def user_form():
     users=db.session.query(Users).all()
     return render_template('createuser.html', form=form, users=users)
 
-@app.route('/updateuser/<int:id>', methods=['GET','POST'])   #methods=["PATCH"]
+@app.route('/updateuser/<int:id>', methods=['GET','POST'])   #methods=['PATCH']
 @login_required
 def update_user(id):
     form = UserForm()
@@ -252,6 +253,15 @@ def index():
 def how_to_solve():
     return render_template('howtosolve.html')
 
+@app.route("/timer")
+def timer():
+    return render_template('timer.html')
+
+@app.route("/shoppingcart")
+def shoppingcart():
+    return render_template('shoppingcart.html')
+
+
 
 #passing stuff to layout html page
 @app.context_processor
@@ -277,6 +287,15 @@ def show_detail(target_id):
     if product is None:
         return render_template('error.html')
     else:
+        return render_template('productpage.html', product=product)
+
+@app.route("/productpage/<string:target_id>")
+def add_to_cart(target_id):
+    product = db.session.query(Products).filter(Products.id == target_id).first()
+    if product is None:
+        return render_template('error.html')
+    else:
+        flash('added to cart')  #f'{product.name}
         return render_template('productpage.html', product=product)
 
 

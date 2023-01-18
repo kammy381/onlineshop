@@ -30,7 +30,7 @@
   <strong>Postal code: </strong> {{ current_user.postal_code }} <br>
   <strong>City: </strong> {{ current_user.city }} <br>
   <strong>Country: </strong> {{ current_user.country }} <br>
-  <strong>Date created:</strong> {{ current_user.created_at }} <br>
+  <strong>Date created:</strong> {{ current_user.created_at.date() }} <br>
   <br>
   <a href="{{url_for('logout')}}" class="btn btn-primary">Logout</a>
   <a href="{{url_for('update_user', id=current_user.id)}}" class="btn btn-warning">Edit Account</a>

@@ -17,7 +17,7 @@
 
 
 <h1>Product Details</h1>
-
+<!--
      <div class="card " style="width: 18rem;">
         <img src={{product.image_url}} class="card-img-top" alt="cube image" style="max-height:250px;max-width:250px; display: block; margin-left:auto; margin-right:auto; height:auto;width:auto;">
         <div class="card-header"><h5>{{product.name}}</h5></div>
@@ -26,6 +26,7 @@
           <p><strong>Price: </strong>€{{'%.2f' % product.price }}</p>
           <p><strong>Added by user: </strong>{{ product.user.username }}</p>
           <p><strong>Posted at: </strong>{{product.created_at.date() }} </p>
+          <a href="{{ url_for('show_detail',target_id=product['id']) }}" class="btn btn-primary ">Add to cart</a>
 
           {% if current_user.is_authenticated and (current_user.id==product.user.id or current_user.id==19) %}
           <a class="btn btn-primary float-end" href="{{ url_for('update_product', id=product.id)}}"> Edit </a>
@@ -33,6 +34,30 @@
 
         </div>
       </div>
+-->
+<div class="card mb-3" style="max-width: 900px;">
+  <div class="row g-0">
+    <div class="col-lg-4">
+      <img src="{{product.image_url}}" class="img-fluid rounded-start" alt="cube" >
+    </div>
+    <div class="col-md-8">
+      <div class="card-body">
+        <h5 class="card-title">{{product.name}}</h5>
+        <p><strong>Price: </strong>€{{'%.2f' % product.price }}</p>
+        <p class="card-text"><strong>Description: </strong> {{product.description|safe }}</p>
+
+        <p class="card-text"><small class="text-muted">Date added: {{product.created_at.date() }} by {{ product.user.username }}</small></p>
+
+      </div>
+    </div>
+    <div class="card-footer">
+      {% if current_user.is_authenticated and (current_user.id==product.user.id or current_user.id==19) %}
+      <a class="btn btn-primary " href="{{ url_for('update_product', id=product.id)}}"> Edit </a>
+      {% endif %}
+      <a href="{{ url_for('add_to_cart',target_id=product['id']) }}" class="btn btn-primary float-end ">Add to cart</a>
+    </div>
+  </div>
+</div>
 
 
 
