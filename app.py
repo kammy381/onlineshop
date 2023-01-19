@@ -283,9 +283,8 @@ def cart_item(product_id,cart_id):
 @login_required #for now
 def add_to_cart(target_id):
     product = db.session.query(Products).filter(Products.id == target_id).first()
-    item_already_in_cart= db.session.query(Cart_items).filter(Cart_items.product_id == target_id).first()
-    #check if cart for the user exists
 
+    #check if cart for the user exists
     cart_check=db.session.query(Carts).filter(Carts.user_id==current_user.id).first()
 
     #no cart with current user id?  create new one, else use the existing one
@@ -305,6 +304,8 @@ def add_to_cart(target_id):
     if product is None:
         return render_template('error.html')
     else:
+        #check if item is in cart_items and if that cart_item is in your cart
+        item_already_in_cart = db.session.query(Cart_items).filter(Cart_items.product_id == target_id, Cart_items.cart_id == cart_id ).first()
         if item_already_in_cart:
             flash("product already in cart")
             return redirect(url_for('show_detail', target_id=product.id))
@@ -312,6 +313,32 @@ def add_to_cart(target_id):
             cart_item(product_id=product.id,cart_id=cart_id)
             flash(f'{product.name} has been added to your cart')
             return redirect(url_for('show_detail', target_id=product.id))
+
+@app.route("/shoppingcart/<string:item_id>/delete_from_cart")
+@login_required #for now
+def delete_from_cart(item_id):
+
+    cart_check = db.session.query(Carts).filter(Carts.user_id == current_user.id).first()
+    #don't need to check if cart exists, because you don't have a delete button in an empty cart
+
+    item_to_delete = Cart_items.query.get_or_404(item_id)
+
+    if cart_check.id == item_to_delete.cart_id:
+        try:
+            db.session.delete(item_to_delete)
+            db.session.commit()
+            flash("Product removed from cart!")
+            cart_items = db.session.query(Cart_items).filter(Cart_items.cart_id == cart_check.id).all()
+            return redirect(url_for('shoppingcart', cart_items=cart_items))
+        except:
+            flash('Something went wrong!')
+            cart_items = db.session.query(Cart_items).filter(Cart_items.cart_id == cart_check.id).all()
+            return render_template('shoppingcart.html', cart_items=cart_items)
+    else:
+        flash("Not your product! You can't remove this one!")
+        cart_items = db.session.query(Cart_items).filter(Cart_items.cart_id == cart_check.id).all()
+        return render_template('shoppingcart.html', cart_items=cart_items)
+
 
 
 #passing stuff to layout html page
