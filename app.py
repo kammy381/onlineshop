@@ -272,7 +272,7 @@ def shoppingcart():
         return render_template('shoppingcart.html')
 
 def cart_item(product_id,cart_id):
-    quantity=1
+    quantity=1 #need to add this in a form?
     created_at = datetime.now()
     updated_at = datetime.now()
     cart_item = Cart_items(product_id,cart_id,quantity,created_at,updated_at)
