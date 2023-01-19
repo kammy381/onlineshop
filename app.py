@@ -21,7 +21,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
 
 db = SQLAlchemy(app)
 
-from models import Products, Users
+from models import Products, Users, Carts, Cart_items
 
 
 #login magic
@@ -262,9 +262,56 @@ def about_me():
     return render_template('aboutme.html')
 
 @app.route("/shoppingcart")
+@login_required
 def shoppingcart():
-    return render_template('shoppingcart.html')
+    cart_check = db.session.query(Carts).filter(Carts.user_id == current_user.id).first()
+    if cart_check:
+        cart_items = db.session.query(Cart_items).filter(Cart_items.cart_id == cart_check.id).all()
+        return render_template('shoppingcart.html', cart_items=cart_items)
+    else:
+        return render_template('shoppingcart.html')
 
+def cart_item(product_id,cart_id):
+    quantity=1
+    created_at = datetime.now()
+    updated_at = datetime.now()
+    cart_item = Cart_items(product_id,cart_id,quantity,created_at,updated_at)
+    db.session.add(cart_item)
+    db.session.commit()
+
+@app.route("/productpage/<string:target_id>/add_to_cart")
+@login_required #for now
+def add_to_cart(target_id):
+    product = db.session.query(Products).filter(Products.id == target_id).first()
+    item_already_in_cart= db.session.query(Cart_items).filter(Cart_items.product_id == target_id).first()
+    #check if cart for the user exists
+
+    cart_check=db.session.query(Carts).filter(Carts.user_id==current_user.id).first()
+
+    #no cart with current user id?  create new one, else use the existing one
+    if cart_check is None:
+        full_name= 'fullname'
+        user_id = current_user.id
+        created_at = datetime.now()
+        updated_at = datetime.now()
+        cart=Carts(full_name,user_id,created_at,updated_at)
+        db.session.add(cart)
+        db.session.commit()
+    else:
+        cart=cart_check
+
+    cart_id=cart.id
+
+    if product is None:
+        return render_template('error.html')
+    else:
+        if item_already_in_cart:
+            flash("product already in cart")
+            return redirect(url_for('show_detail', target_id=product.id))
+        else:
+            cart_item(product_id=product.id,cart_id=cart_id)
+            flash(f'{product.name} has been added to your cart')
+            return redirect(url_for('show_detail', target_id=product.id))
 
 
 #passing stuff to layout html page
@@ -294,15 +341,7 @@ def show_detail(target_id):
 
         return render_template('productpage.html', product=product)
 
-@app.route("/productpage/<string:target_id>/add_to_cart")
-def add_to_cart(target_id):
-    product = db.session.query(Products).filter(Products.id == target_id).first()
 
-    if product is None:
-        return render_template('error.html')
-    else:
-        flash(f'{product.name} has been added to your cart')
-        return redirect(url_for('show_detail', target_id=product.id))
 
 
 #errors
