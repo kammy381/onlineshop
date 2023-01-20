@@ -52,9 +52,11 @@
                       <p class="fw-bold mb-0 me-5 pe-3">€{{'%.2f' % cart_item.product.price }}</p>
                       <div class="def-number-input number-input safari_only">
                         <!-- dunno how it works yet -->
-                        <button onclick="this.parentNode.querySelector('input[type=number]').stepDown()" class="minus"></button>
-                        <input class="quantity fw-bold text-black" min="0" name="quantity" value="1" type="number">
-                        <button onclick="this.parentNode.querySelector('input[type=number]').stepUp()" class="plus"></button>
+                        <form action="/change_quantity/{{ cart_item.id }}" method="POST">
+                          <button onclick="this.parentNode.querySelector('input[type=number]').stepDown()" class="minus" type="submit"></button>
+                          <input class="quantity fw-bold text-black "  min="1" max="99"  name="quantity" value="{{cart_item.quantity}}" type="number" readonly>
+                          <button onclick="this.parentNode.querySelector('input[type=number]').stepUp()" class="plus" type="submit"></button>
+                        </form>
                       </div>
                     </div>
                   </div>
@@ -72,7 +74,7 @@
 
                 <div class="d-flex justify-content-between p-2 mb-2" style="background-color: #e1f5fe;">
                   <h5 class="fw-bold mb-0">Total:</h5>
-                  <h5 class="fw-bold mb-0">€ </h5>
+                  <h5 class="fw-bold mb-0">€ {{ '%.2f' % total_price }}</h5>
                 </div>
 
               </div>

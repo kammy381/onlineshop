@@ -267,12 +267,60 @@ def shoppingcart():
     cart_check = db.session.query(Carts).filter(Carts.user_id == current_user.id).first()
     if cart_check:
         cart_items = db.session.query(Cart_items).filter(Cart_items.cart_id == cart_check.id).all()
-        return render_template('shoppingcart.html', cart_items=cart_items)
+        price=0
+        for item in cart_items:
+            price+= (item.product.price * item.quantity)
+        return render_template('shoppingcart.html', cart_items=cart_items , total_price=price)
     else:
         return render_template('shoppingcart.html')
 
+@app.route('/change_quantity/<int:id>', methods=['GET','POST'])
+def change_quantity(id):
+    cart_item_to_change = Cart_items.query.get_or_404(id)
+
+    if request.method == 'POST':
+        quantity= request.form["quantity"]
+        #update cart also
+        cart_item_to_change.updated_at=datetime.now()
+        cart_item_to_change.quantity = quantity
+        try:
+            db.session.add(cart_item_to_change)
+            db.session.commit()
+            flash("Product updated!")  # remove
+            return redirect(url_for('shoppingcart'))
+        except:
+            flash("something went wrong")
+            return redirect(url_for('shoppingcart'))
+
+
+    else:
+        flash('poep')
+        return redirect(url_for('shoppingcart'))
+
+
+    # cart_item_to_change = Cart_items.query.get_or_404(item_id)
+    # cart_item_to_change.quantity=quantity
+    #            # update database
+    # if request.method == 'POST':
+    #     try:
+    #         db.session.add(cart_item_to_change)
+    #         db.session.commit()
+    #     except:
+    #         flash('something went wrong')
+    #
+    #     cart_check = db.session.query(Carts).filter(Carts.user_id == current_user.id).first()
+    #     if cart_check:
+    #         cart_items = db.session.query(Cart_items).filter(Cart_items.cart_id == cart_check.id).all()
+    #         return render_template('shoppingcart.html', cart_items=cart_items)
+    #     else:
+    #         return render_template('shoppingcart.html')
+
+
+
+
+
 def cart_item(product_id,cart_id):
-    quantity=1 #need to add this in a form?
+    quantity=1
     created_at = datetime.now()
     updated_at = datetime.now()
     cart_item = Cart_items(product_id,cart_id,quantity,created_at,updated_at)
@@ -296,7 +344,7 @@ def add_to_cart(target_id):
         cart=Carts(full_name,user_id,created_at,updated_at)
         db.session.add(cart)
         db.session.commit()
-    else:
+    else: #update cart needed
         cart=cart_check
 
     cart_id=cart.id
@@ -324,12 +372,12 @@ def delete_from_cart(item_id):
     item_to_delete = Cart_items.query.get_or_404(item_id)
 
     if cart_check.id == item_to_delete.cart_id:
-        try:
+        try: #update cart needed
             db.session.delete(item_to_delete)
             db.session.commit()
             flash("Product removed from cart!")
-            cart_items = db.session.query(Cart_items).filter(Cart_items.cart_id == cart_check.id).all()
-            return redirect(url_for('shoppingcart', cart_items=cart_items))
+            #cart_items = db.session.query(Cart_items).filter(Cart_items.cart_id == cart_check.id).all()
+            return redirect(url_for('shoppingcart'))
         except:
             flash('Something went wrong!')
             cart_items = db.session.query(Cart_items).filter(Cart_items.cart_id == cart_check.id).all()
@@ -367,8 +415,6 @@ def show_detail(target_id):
     else:
 
         return render_template('productpage.html', product=product)
-
-
 
 
 #errors

@@ -26,7 +26,7 @@ class Products(db.Model):
 
     #runs when we create a new one
     def __init__(self, name, price, image_url, description, created_at, updated_at, user_id):
-        #self.id = id
+
         self.name = name
         self.price = price
         self.image_url = image_url
@@ -34,8 +34,7 @@ class Products(db.Model):
         self.created_at = created_at
         self.updated_at = updated_at
         self.user_id = user_id
-        # self.cart_items = cart_items
-        # self.order_lines=order_lines
+
 
     #represents object when we query for it
     def __repr__(self):
@@ -54,7 +53,7 @@ class Cart_items(db.Model):
 
     #runs when we create a new one
     def __init__(self, product_id,cart_id, quantity, created_at, updated_at):
-        #self.id=id
+
         self.product_id = product_id
         self.cart_id = cart_id
         self.quantity = quantity
@@ -80,13 +79,13 @@ class Carts(db.Model):
 
     # runs when we create a new one
     def __init__(self, full_name, user_id, created_at, updated_at):
-        #self.id = id
+
         self.full_name = full_name
         self.user_id = user_id
         self.created_at = created_at
         self.updated_at = updated_at
 
-        #self.cart_items=cart_items
+
 
     # represents object when we query for it
     def __repr__(self):
@@ -105,7 +104,7 @@ class Order_lines(db.Model):
 
     # runs when we create a new one
     def __init__(self, product_id, cart_id, quantity, price_per_unit, created_at, updated_at):
-        #self.id=id
+
         self.product_id = product_id
         self.cart_id = cart_id
         self.quantity = quantity
@@ -131,13 +130,12 @@ class Orders(db.Model):
 
     # runs when we create a new one
     def __init__(self, full_name, user_id, created_at, updated_at):
-        #self.id = id
+
         self.full_name = full_name
         self.user_id = user_id
         self.created_at = created_at
         self.updated_at = updated_at
-        # self.cart_ids = cart_ids
-        # self.payments = payments
+
 
     # represents object when we query for it
     def __repr__(self):
@@ -158,7 +156,6 @@ class Users(db.Model, UserMixin):
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
 
-    #is user ok? or different name?
     products = db.relationship('Products', backref='user')
     orders = db.relationship('Orders', backref='user')
     carts = db.relationship('Carts', backref='user', uselist=False)
@@ -176,7 +173,7 @@ class Users(db.Model, UserMixin):
 
     # runs when we create a new one
     def __init__(self,username, email, password_hash, address, postal_code, city, country, created_at, updated_at):
-        #self.id = id
+
         self.username = username
         self.email = email
         self.password_hash = password_hash
@@ -186,9 +183,6 @@ class Users(db.Model, UserMixin):
         self.country = country
         self.created_at = created_at
         self.updated_at = updated_at
-        # self.orders=orders
-        # self.carts=carts
-        # self.payments=payments
 
     # represents object when we query for it
     def __repr__(self):
