@@ -237,6 +237,7 @@ def delete_product(id):
             return render_template('index.html', products=products)
         except:
             flash('Something went wrong!')
+            products = db.session.query(Products).all()
             return render_template('index.html', products=products)
     else:
         flash("Not your product! You can't delete this one!")
@@ -246,9 +247,11 @@ def delete_product(id):
 @app.route("/")
 def index():
     #order by something?
-    products=Products.query.order_by(Products.updated_at)
-    return render_template('index.html', products=products)
+    page = request.args.get('page', 1, type=int)
 
+    products = Products.query.order_by(Products.updated_at).paginate(page=page, per_page=8)
+    #products=Products.query.order_by(Products.updated_at)
+    return render_template('index.html', products=products)
 @app.route("/howtosolve")
 def how_to_solve():
     return render_template('howtosolve.html')
@@ -266,7 +269,7 @@ def about_me():
 def shoppingcart():
     cart_check = db.session.query(Carts).filter(Carts.user_id == current_user.id).first()
     if cart_check:
-        cart_items = db.session.query(Cart_items).filter(Cart_items.cart_id == cart_check.id).all()
+        cart_items = db.session.query(Cart_items).filter(Cart_items.cart_id == cart_check.id).order_by(Cart_items.created_at).all()
         price=0
         for item in cart_items:
             price+= (item.product.price * item.quantity)
@@ -279,22 +282,25 @@ def change_quantity(id):
     cart_item_to_change = Cart_items.query.get_or_404(id)
 
     if request.method == 'POST':
+        #there is no 'webform' for this
         quantity= request.form["quantity"]
-        #update cart also
+        #update cart and item
+        cart_item_to_change.cart.updated_at=datetime.now()
+
         cart_item_to_change.updated_at=datetime.now()
         cart_item_to_change.quantity = quantity
+
         try:
             db.session.add(cart_item_to_change)
             db.session.commit()
-            flash("Product updated!")  # remove
+
             return redirect(url_for('shoppingcart'))
         except:
             flash("something went wrong")
             return redirect(url_for('shoppingcart'))
 
-
     else:
-        flash('poep')
+        flash('something went wrong')
         return redirect(url_for('shoppingcart'))
 
 
@@ -316,10 +322,8 @@ def change_quantity(id):
     #         return render_template('shoppingcart.html')
 
 
-
-
-
 def cart_item(product_id,cart_id):
+    #add updated_at whole cart
     quantity=1
     created_at = datetime.now()
     updated_at = datetime.now()
@@ -344,7 +348,7 @@ def add_to_cart(target_id):
         cart=Carts(full_name,user_id,created_at,updated_at)
         db.session.add(cart)
         db.session.commit()
-    else: #update cart needed
+    else:
         cart=cart_check
 
     cart_id=cart.id
@@ -370,13 +374,18 @@ def delete_from_cart(item_id):
     #don't need to check if cart exists, because you don't have a delete button in an empty cart
 
     item_to_delete = Cart_items.query.get_or_404(item_id)
-
+    item_to_delete.cart.updated_at = datetime.now()
     if cart_check.id == item_to_delete.cart_id:
-        try: #update cart needed
+        try:
+            # update cart
+            db.session.add(item_to_delete)
+
+            #delete item
             db.session.delete(item_to_delete)
+
             db.session.commit()
             flash("Product removed from cart!")
-            #cart_items = db.session.query(Cart_items).filter(Cart_items.cart_id == cart_check.id).all()
+
             return redirect(url_for('shoppingcart'))
         except:
             flash('Something went wrong!')
@@ -398,13 +407,15 @@ def passthrough():
 @app.route('/search', methods=['POST'])
 def search():
     form= SearchForm()
+    page = request.args.get('page', 1, type=int)
     if form.validate_on_submit():
-
+        #paginate or redirect index
         product_searched = form.searched.data
-        products= Products.query.filter(Products.name.ilike('%' + product_searched + '%')).order_by(Products.updated_at).all()
+
+        products= Products.query.filter(Products.name.ilike('%' + product_searched + '%')).order_by(Products.updated_at).paginate(page=page, per_page=8)
 
         return render_template('index.html',form=form, products=products)
-    return render_template('index.html', form=form, products=Products.query.order_by(Products.updated_at))
+    return render_template('index.html', form=form, products = Products.query.order_by(Products.updated_at).paginate(page=page, per_page=8))
 
 
 @app.route("/productpage/<string:target_id>")
