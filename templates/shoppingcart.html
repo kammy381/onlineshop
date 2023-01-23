@@ -51,7 +51,7 @@
                     <div class="d-flex align-items-center">
                       <p class="fw-bold mb-0 me-5 pe-3">€{{'%.2f' % cart_item.product.price }}</p>
                       <div class="def-number-input number-input safari_only">
-                        <!-- dunno how it works yet -->
+                        <!--  + and - buttons -->
                         <form action="/change_quantity/{{ cart_item.id }}" method="POST">
                           <button onclick="this.parentNode.querySelector('input[type=number]').stepDown()" class="minus" type="submit"></button>
                           <input class="quantity fw-bold text-black "  min="1" max="99"  name="quantity" value="{{cart_item.quantity}}" type="number" readonly>
@@ -74,7 +74,11 @@
 
                 <div class="d-flex justify-content-between p-2 mb-2" style="background-color: #e1f5fe;">
                   <h5 class="fw-bold mb-0">Total:</h5>
+                  {% if total_price %}
                   <h5 class="fw-bold mb-0">€ {{ '%.2f' % total_price }}</h5>
+                  {% else %}
+                  <h5 class="fw-bold mb-0">€ 0</h5>
+                  {% endif %}
                 </div>
 
               </div>
@@ -92,8 +96,8 @@
 
                   <div class="form-outline mb-5">
                     <input type="text" id="typeName" class="form-control form-control-lg" siez="17"
-                      value="somethingelse" />
-                    <label class="form-label" for="typeName">Somethingelse</label>
+                      value="tempemail" />
+                    <label class="form-label" for="typeName">Email</label>
                   </div>
 
                   <div class="row">

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, flash, request, redirect, url_for
+from flask import Flask, render_template, flash, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 import os
 from datetime import datetime
@@ -28,6 +28,10 @@ from models import Products, Users, Carts, Cart_items
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view='login'
+
+
+
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -107,8 +111,8 @@ def user_form():
         else:
             flash("This email is already in use!")
 
-    users=db.session.query(Users).all()
-    return render_template('createuser.html', form=form, users=users)
+
+    return render_template('createuser.html', form=form)
 
 @app.route('/updateuser/<int:id>', methods=['GET','POST'])   #methods=['PATCH']
 @login_required
@@ -151,11 +155,11 @@ def delete_user(id):
             db.session.delete(user_to_delete)
             db.session.commit()
             flash("User deleted!")
-            users = db.session.query(Users).all()
-            return render_template('createuser.html', form=form, users=users)
+
+            return render_template('createuser.html', form=form)
         except:
             flash('Something went wrong!')
-            return render_template('createuser.html', form=form, users=users)
+            return render_template('createuser.html', form=form)
     else:
         flash('You can only delete your own user!')
         products = db.session.query(Products).all()
@@ -246,11 +250,10 @@ def delete_product(id):
 
 @app.route("/")
 def index():
-    #order by something?
+    #ordered by update date
     page = request.args.get('page', 1, type=int)
 
     products = Products.query.order_by(Products.updated_at).paginate(page=page, per_page=8)
-    #products=Products.query.order_by(Products.updated_at)
     return render_template('index.html', products=products)
 @app.route("/howtosolve")
 def how_to_solve():
@@ -265,20 +268,21 @@ def about_me():
     return render_template('aboutme.html')
 
 @app.route("/shoppingcart")
-@login_required
 def shoppingcart():
-    cart_check = db.session.query(Carts).filter(Carts.user_id == current_user.id).first()
-    if cart_check:
-        cart_items = db.session.query(Cart_items).filter(Cart_items.cart_id == cart_check.id).order_by(Cart_items.created_at).all()
-        price=0
+
+    if 'cart' in session:
+        cartnumber = session['cart']
+        cart_items = db.session.query(Cart_items).filter(Cart_items.cart_id == cartnumber).order_by(Cart_items.created_at).all()
+        price = 0
         for item in cart_items:
-            price+= (item.product.price * item.quantity)
-        return render_template('shoppingcart.html', cart_items=cart_items , total_price=price)
+            price += (item.product.price * item.quantity)
+        return render_template('shoppingcart.html', cart_items=cart_items, total_price=price)
     else:
         return render_template('shoppingcart.html')
 
 @app.route('/change_quantity/<int:id>', methods=['GET','POST'])
 def change_quantity(id):
+
     cart_item_to_change = Cart_items.query.get_or_404(id)
 
     if request.method == 'POST':
@@ -304,78 +308,89 @@ def change_quantity(id):
         return redirect(url_for('shoppingcart'))
 
 
-    # cart_item_to_change = Cart_items.query.get_or_404(item_id)
-    # cart_item_to_change.quantity=quantity
-    #            # update database
-    # if request.method == 'POST':
-    #     try:
-    #         db.session.add(cart_item_to_change)
-    #         db.session.commit()
-    #     except:
-    #         flash('something went wrong')
-    #
-    #     cart_check = db.session.query(Carts).filter(Carts.user_id == current_user.id).first()
-    #     if cart_check:
-    #         cart_items = db.session.query(Cart_items).filter(Cart_items.cart_id == cart_check.id).all()
-    #         return render_template('shoppingcart.html', cart_items=cart_items)
-    #     else:
-    #         return render_template('shoppingcart.html')
-
-
 def cart_item(product_id,cart_id):
-    #add updated_at whole cart
+
     quantity=1
     created_at = datetime.now()
     updated_at = datetime.now()
+    #create cart_item
     cart_item = Cart_items(product_id,cart_id,quantity,created_at,updated_at)
+    #update cart
+    cart=Carts.query.get_or_404(session['cart'])
+    cart.updated_at = datetime.now()
+
+    db.session.add(cart)
     db.session.add(cart_item)
     db.session.commit()
 
 @app.route("/productpage/<string:target_id>/add_to_cart")
-@login_required #for now
 def add_to_cart(target_id):
-    product = db.session.query(Products).filter(Products.id == target_id).first()
+    #user is logged in
+    if not current_user.is_anonymous:
+        cart_check = db.session.query(Carts).filter(Carts.user_id == current_user.id).first()
+        #user already has a cart
+        if cart_check:
+            cartnumber=cart_check.id
 
-    #check if cart for the user exists
-    cart_check=db.session.query(Carts).filter(Carts.user_id==current_user.id).first()
+        #user doesn't have a cart, let's make one
+        else:
+            full_name= None
+            user_id = current_user.id
+            created_at = datetime.now()
+            updated_at = datetime.now()
+            cart=Carts(full_name,user_id,created_at,updated_at)
+            db.session.add(cart)
+            db.session.commit()
+            cart_check = db.session.query(Carts).filter(Carts.user_id == current_user.id).first()
+            cartnumber = cart_check.id
 
-    #no cart with current user id?  create new one, else use the existing one
-    if cart_check is None:
-        full_name= 'fullname'
-        user_id = current_user.id
-        created_at = datetime.now()
-        updated_at = datetime.now()
-        cart=Carts(full_name,user_id,created_at,updated_at)
-        db.session.add(cart)
-        db.session.commit()
+        # add that cartnr to session
+        session['cart'] = cartnumber
+
+    #user is not logged in
     else:
-        cart=cart_check
+        #already has a cart
+        if 'cart' in session:
+            cartnumber=session['cart']
+        #create a cart
+        else:
+            full_name = None
+            user_id = None
+            created_at = datetime.now()
+            updated_at = datetime.now()
+            cart=Carts(full_name,user_id,created_at,updated_at)
+            db.session.add(cart)
+            db.session.commit()
+            cart_id=db.session.query(Carts).filter(Carts.created_at==created_at).first()
+            session["cart"]=cart_id.id
 
-    cart_id=cart.id
+            cartnumber=session['cart']
+
+
+    product = db.session.query(Products).filter(Products.id == target_id).first()
 
     if product is None:
         return render_template('error.html')
     else:
         #check if item is in cart_items and if that cart_item is in your cart
-        item_already_in_cart = db.session.query(Cart_items).filter(Cart_items.product_id == target_id, Cart_items.cart_id == cart_id ).first()
+        item_already_in_cart = db.session.query(Cart_items).filter(Cart_items.product_id == target_id, Cart_items.cart_id == cartnumber).first()
         if item_already_in_cart:
             flash("product already in cart")
             return redirect(url_for('show_detail', target_id=product.id))
         else:
-            cart_item(product_id=product.id,cart_id=cart_id)
+            cart_item(product_id=product.id,cart_id=cartnumber)
             flash(f'{product.name} has been added to your cart')
             return redirect(url_for('show_detail', target_id=product.id))
 
 @app.route("/shoppingcart/<string:item_id>/delete_from_cart")
-@login_required #for now
+
 def delete_from_cart(item_id):
 
-    cart_check = db.session.query(Carts).filter(Carts.user_id == current_user.id).first()
-    #don't need to check if cart exists, because you don't have a delete button in an empty cart
-
+    #your session cart
+    cart_id=session['cart']
     item_to_delete = Cart_items.query.get_or_404(item_id)
     item_to_delete.cart.updated_at = datetime.now()
-    if cart_check.id == item_to_delete.cart_id:
+    if item_to_delete.cart_id == cart_id:
         try:
             # update cart
             db.session.add(item_to_delete)
@@ -389,13 +404,10 @@ def delete_from_cart(item_id):
             return redirect(url_for('shoppingcart'))
         except:
             flash('Something went wrong!')
-            cart_items = db.session.query(Cart_items).filter(Cart_items.cart_id == cart_check.id).all()
-            return render_template('shoppingcart.html', cart_items=cart_items)
+            return redirect(url_for('shoppingcart'))
     else:
         flash("Not your product! You can't remove this one!")
-        cart_items = db.session.query(Cart_items).filter(Cart_items.cart_id == cart_check.id).all()
-        return render_template('shoppingcart.html', cart_items=cart_items)
-
+        return redirect(url_for('shoppingcart'))
 
 
 #passing stuff to layout html page
@@ -426,6 +438,8 @@ def show_detail(target_id):
     else:
 
         return render_template('productpage.html', product=product)
+
+
 
 
 #errors

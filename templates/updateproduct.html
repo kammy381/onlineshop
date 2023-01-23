@@ -47,7 +47,7 @@
 
       </form>
       {{ ckeditor.load() }}
-      {{ ckeditor.config(name='description') }}
+      {{ ckeditor.config(name='description', custom_config=" removeButtons: 'Image,Source,Link,Unlink'") }}
 
     </div>
   </div>

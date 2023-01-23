@@ -34,7 +34,7 @@
         </div>
         <div class="card-footer">
           <strong>Price: </strong>€{{'%.2f' % product.price }}
-          <a href="{{ url_for('show_detail',target_id=product['id']) }}" class="btn btn-primary float-end ">Details</a>
+          <a href="{{ url_for('show_detail',target_id=product['id']) }}" class="btn btn-primary float-end " >Details</a>
         </div>
 
       </div>
@@ -55,7 +55,7 @@
 <div class="text-right">
   <a href="{{ url_for('index', page=products.prev_num) }}"
      class="btn btn-outline-dark
-     {% if products.page == 1 %}disabled{% endif %}">
+     {% if products.page == 1 %}disabled{% endif %}" >
       &laquo;
   </a>
 <!-- Loop through the number of pages to display a link for each-->
@@ -64,7 +64,7 @@
 <!-- Check for the active page and set the link to "Active"-->
           {% if products.page == page_num %}
           <a href="{{ url_for('index', page=page_num) }}"
-             class="btn btn-dark">
+             class="btn btn-dark" style="background:#085c77">
               {{ page_num }}
           </a>
           {% else %}
