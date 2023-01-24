@@ -38,7 +38,6 @@ def load_user(user_id):
     return Users.query.get(int(user_id))
 
 
-
 @app.route('/login', methods=["GET","POST"])
 def login():
     form = LoginForm()
@@ -48,6 +47,32 @@ def login():
             #check password
             if check_password_hash(user.password_hash,form.password.data):
                 login_user(user)
+
+                #old cart check
+                cart_check = db.session.query(Carts).filter(Carts.user_id == current_user.id).first()
+
+                #if there is a not logged in cart, it gets attached to your account, old one from account gets deleted
+                if 'cart' in session:
+                    cartnumber=session['cart']
+
+                    #delete old cart,  still need to delete old cart items(?)
+                    if cart_check:
+                        oldcart=Carts.query.get_or_404(cart_check.id)
+                        db.session.delete(oldcart)
+
+                    #replace with new one
+                    cart= Carts.query.get_or_404(cartnumber)
+
+                    cart.user_id=user.id
+                    db.session.add(cart)
+                    db.session.commit()
+                else:
+                    #if there was none in session add existing one if there is one
+                    if cart_check:
+                        session['cart']=cart_check.id
+                    else:
+                        pass
+
                 flash('You have successfully logged in!')
                 return redirect(url_for('dashboard'))
             else:
@@ -383,7 +408,6 @@ def add_to_cart(target_id):
             return redirect(url_for('show_detail', target_id=product.id))
 
 @app.route("/shoppingcart/<string:item_id>/delete_from_cart")
-
 def delete_from_cart(item_id):
 
     #your session cart
