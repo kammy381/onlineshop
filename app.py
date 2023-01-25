@@ -37,51 +37,59 @@ login_manager.login_view='login'
 def load_user(user_id):
     return Users.query.get(int(user_id))
 
+def check_cart(user):
+    # old cart check
+    cart_check = db.session.query(Carts).filter(Carts.user_id == current_user.id).first()
+
+    # if there is a not logged in cart, it gets attached to your account, old one from account gets deleted
+    if 'cart' in session:
+        cartnumber = session['cart']
+
+        # delete old cart,  still need to delete old cart items(?)
+        if cart_check:
+            oldcart = Carts.query.get_or_404(cart_check.id)
+            db.session.delete(oldcart)
+
+        # replace with new one
+        cart = Carts.query.get_or_404(cartnumber)
+
+        cart.user_id = user.id
+        db.session.add(cart)
+        db.session.commit()
+    else:
+        # if there was none in session add existing one if there is one
+        if cart_check:
+            session['cart'] = cart_check.id
+        else:
+            pass
 
 @app.route('/login', methods=["GET","POST"])
 def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = Users.query.filter_by(username=form.username.data).first()
-        if user:
-            #check password
-            if check_password_hash(user.password_hash,form.password.data):
+        if not user:
+            flash("That user doesn't exist!")
+
+        # correct user
+        else:
+            # check password
+            if not check_password_hash(user.password_hash, form.password.data):
+                flash("Wrong password!")
+
+            # correct password
+            else:
+
                 login_user(user)
-
-                #old cart check
-                cart_check = db.session.query(Carts).filter(Carts.user_id == current_user.id).first()
-
-                #if there is a not logged in cart, it gets attached to your account, old one from account gets deleted
-                if 'cart' in session:
-                    cartnumber=session['cart']
-
-                    #delete old cart,  still need to delete old cart items(?)
-                    if cart_check:
-                        oldcart=Carts.query.get_or_404(cart_check.id)
-                        db.session.delete(oldcart)
-
-                    #replace with new one
-                    cart= Carts.query.get_or_404(cartnumber)
-
-                    cart.user_id=user.id
-                    db.session.add(cart)
-                    db.session.commit()
-                else:
-                    #if there was none in session add existing one if there is one
-                    if cart_check:
-                        session['cart']=cart_check.id
-                    else:
-                        pass
+                check_cart(user)
 
                 flash('You have successfully logged in!')
                 return redirect(url_for('dashboard'))
-            else:
-                flash("Wrong password!")
-        else:
-            flash("That user doesn't exist!")
+
+
     return render_template('login.html', form=form)
 
-@app.route('/logout', methods=["GET","POST"])
+@app.route('/logout', methods=["GET","POST"])  #,"POST" can go?
 @login_required
 def logout():
     logout_user()
