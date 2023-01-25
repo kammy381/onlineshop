@@ -8,17 +8,6 @@
 {% endblock %}
 
 {% block content %}
-<br>
-{% for message in get_flashed_messages() %}
-
-  <div class="alert alert-success alert-dismissible fade show" role="alert">
-  <strong>{{ message }}</strong>
-  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-  </div>
-
-{% endfor %}
-
-
 
 <section class="h-100 h-custom" style="background-color: #eee;">
   <div class="container h-100 py-5">
@@ -89,13 +78,13 @@
                 <form class="mb-5">
 
                   <div class="form-outline mb-5">
-                    <input type="text" id="typeText" class="form-control form-control-lg" siez="17"
+                    <input type="text" id="fullname" class="form-control form-control-lg" size="17"
                       value="placeholdername" minlength="19" maxlength="19" />
                     <label class="form-label" for="typeText">Full name</label>
                   </div>
 
                   <div class="form-outline mb-5">
-                    <input type="text" id="typeName" class="form-control form-control-lg" siez="17"
+                    <input type="text" id="typeName" class="form-control form-control-lg" size="17"
                       value="tempemail" />
                     <label class="form-label" for="typeName">Email</label>
                   </div>
@@ -119,7 +108,7 @@
 
                   <p class="mb-5">This site is fake, so you can't really buy anything <a href="{{ url_for('about_me') }}">read more</a>.</p>
                   <div class="d-grid gap-2">
-                    <button type="button" class="btn btn-primary btn-block btn-lg">Buy now</button>
+                    <a href="{{url_for('order')}}" class="btn btn-primary">Buy now</a>
                   </div>
                   <h5 class="fw-bold mb-5" style="position: absolute; bottom: 0;">
                     <a href="/" style="text-decoration: none"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-left" viewBox="0 0 16 16"><path d="M10 12.796V3.204L4.519 8 10 12.796zm-.659.753-5.48-4.796a1 1 0 0 1 0-1.506l5.48-4.796A1 1 0 0 1 11 3.204v9.592a1 1 0 0 1-1.659.753z"/></svg>Back to shopping</a>

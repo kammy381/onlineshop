@@ -21,16 +21,13 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
 
 db = SQLAlchemy(app)
 
-from models import Products, Users, Carts, Cart_items
+from models import Products, Users, Carts, Cart_items, Orders,Order_lines, Payments
 
 
 #login magic
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view='login'
-
-
-
 
 
 @login_manager.user_loader
@@ -101,7 +98,6 @@ def logout():
 def dashboard():
 
     return render_template('dashboard.html')
-
 
 @app.route("/createuser", methods=['GET','POST'])
 def user_form():
@@ -266,7 +262,7 @@ def delete_product(id):
     user_id = current_user.id
     if user_id == product_to_delete.user.id or user_id==19: #adminkammy:
         try:
-
+            ## delete from cart_items and from orderlines##################################
             db.session.delete(product_to_delete)
             db.session.commit()
             flash("Product deleted!")
@@ -374,8 +370,8 @@ def add_to_cart(target_id):
             cart=Carts(full_name,user_id,created_at,updated_at)
             db.session.add(cart)
             db.session.commit()
-            cart_check = db.session.query(Carts).filter(Carts.user_id == current_user.id).first()
-            cartnumber = cart_check.id
+
+            cartnumber = cart.id
 
         # add that cartnr to session
         session['cart'] = cartnumber
@@ -394,8 +390,8 @@ def add_to_cart(target_id):
             cart=Carts(full_name,user_id,created_at,updated_at)
             db.session.add(cart)
             db.session.commit()
-            cart_id=db.session.query(Carts).filter(Carts.created_at==created_at).first()
-            session["cart"]=cart_id.id
+
+            session["cart"]=cart.id
 
             cartnumber=session['cart']
 
@@ -471,6 +467,60 @@ def show_detail(target_id):
 
         return render_template('productpage.html', product=product)
 
+def order_line(order_id):
+    cart=session['cart']
+
+    cart_items = db.session.query(Cart_items).filter(Cart_items.cart_id == cart).all()
+    for cart_item in cart_items:
+
+        orderline=Order_lines(
+            product_id=cart_item.product_id,
+            quantity=cart_item.quantity,
+            price_per_unit=cart_item.product.price,
+            order_id=order_id,
+            created_at=datetime.now(),
+            updated_at=datetime.now()
+            )
+        db.session.add(orderline)
+
+    db.session.commit()
+
+@app.route("/shoppingcart/order")
+def order():
+    #need to prevent user from placing thesame order
+
+    full_name='get from form'
+
+    #if logged in get user_id
+    user_id=None
+
+    created_at=datetime.now()
+    updated_at=datetime.now()
+
+    order=Orders(full_name=full_name,user_id=user_id,created_at=created_at,updated_at=updated_at)
+
+    db.session.add(order)
+    db.session.commit()
+
+    #creates order_lines after order has been made
+    order_line(order.id)
+
+
+    return redirect(url_for('index'))
+
+@app.route("/shoppingcart/order/payment")
+def payment(order_id):
+
+    #in progress
+
+    payment= Payments(
+        amount=1,
+        order_id=order_id,
+        user_id=1,
+        status='pending',
+        created_at=datetime.now(),
+        updated_at=datetime.now()
+    )
 
 
 

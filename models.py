@@ -62,7 +62,7 @@ class Cart_items(db.Model):
 
     #represents object when we query for it
     def __repr__(self):
-        return '<cart_id {}>'.format(self.cart_id)
+        return '<id {}>'.format(self.id)
 
 
 class Carts(db.Model):
@@ -91,22 +91,21 @@ class Carts(db.Model):
     def __repr__(self):
         return '<id {}>'.format(self.id)
 
-
 class Order_lines(db.Model):
     __tablename__ = 'order_line'
     id = db.Column(db.Integer, primary_key=True)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
-    cart_id = db.Column(db.Integer, db.ForeignKey('orders.id'))
+    order_id = db.Column(db.Integer, db.ForeignKey('orders.id'))
     quantity = db.Column(db.Integer)
     price_per_unit = db.Column(db.Float)
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
 
     # runs when we create a new one
-    def __init__(self, product_id, cart_id, quantity, price_per_unit, created_at, updated_at):
+    def __init__(self, product_id, order_id, quantity, price_per_unit, created_at, updated_at):
 
         self.product_id = product_id
-        self.cart_id = cart_id
+        self.order_id = order_id
         self.quantity = quantity
         self.price_per_unit = price_per_unit
         self.created_at = created_at
@@ -125,7 +124,7 @@ class Orders(db.Model):
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
 
-    cart_ids = db.relationship('Order_lines',backref='orders')
+    order_lines = db.relationship('Order_lines',backref='orders')
     payments = db.relationship('Payments', backref='orders', uselist=False)
 
     # runs when we create a new one
