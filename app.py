@@ -42,10 +42,13 @@ def check_cart(user):
     if 'cart' in session:
         cartnumber = session['cart']
 
-        # delete old cart,  still need to delete old cart items(?)
+        # delete old cart,  and delete cartless items
         if cart_check:
             oldcart = Carts.query.get_or_404(cart_check.id)
             db.session.delete(oldcart)
+            old_cart_items = db.session.query(Cart_items).filter(Cart_items.cart_id == None).all()
+            for item in old_cart_items:
+                db.session.delete(item)
 
         # replace with new one
         cart = Carts.query.get_or_404(cartnumber)
@@ -194,7 +197,6 @@ def delete_user(id):
         products = db.session.query(Products).all()
         return render_template('index.html', products=products)
 
-
 @app.route("/addproduct", methods=['GET','POST'])
 @login_required
 def product_form():
@@ -335,7 +337,6 @@ def change_quantity(id):
     else:
         flash('something went wrong')
         return redirect(url_for('shoppingcart'))
-
 
 def cart_item(product_id,cart_id):
 
@@ -485,14 +486,38 @@ def order_line(order_id):
 
     db.session.commit()
 
+
+def payment(order_id,user_id):
+
+    ordered_items = db.session.query(Order_lines).filter(Order_lines.order_id == order_id).all()
+    price = 0
+    for item in ordered_items:
+        price += (item.price_per_unit * item.quantity)
+
+
+    payment= Payments(
+        amount=price,
+        order_id=order_id,
+        user_id=user_id,
+        status='succeeded',
+        created_at=datetime.now(),
+        updated_at=datetime.now()
+    )
+    db.session.add(payment)
+    db.session.commit()
+
 @app.route("/shoppingcart/order")
 def order():
     #need to prevent user from placing thesame order
 
     full_name='get from form'
 
-    #if logged in get user_id
-    user_id=None
+    #user not logged in
+    if current_user.is_anonymous:
+        user_id=None
+    #user logged in
+    else:
+        user_id=current_user.id
 
     created_at=datetime.now()
     updated_at=datetime.now()
@@ -505,23 +530,17 @@ def order():
     #creates order_lines after order has been made
     order_line(order.id)
 
+    #creates a payment
+    payment(order.id,user_id)
+
+    #delete cart from session
+    if user_id is not None:
+        flash('Order successful! You can view your order in your dashboard')
+    else:
+        flash("Order successful!")
+
 
     return redirect(url_for('index'))
-
-@app.route("/shoppingcart/order/payment")
-def payment(order_id):
-
-    #in progress
-
-    payment= Payments(
-        amount=1,
-        order_id=order_id,
-        user_id=1,
-        status='pending',
-        created_at=datetime.now(),
-        updated_at=datetime.now()
-    )
-
 
 
 #errors
