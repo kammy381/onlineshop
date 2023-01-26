@@ -19,7 +19,6 @@ env_config = os.getenv("APP_SETTINGS", "config.ProductionConfig")
 app.config.from_object(env_config)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
 
-
 db = SQLAlchemy(app)
 
 from models import Products, Users, Carts, Cart_items, Orders,Order_lines, Payments
