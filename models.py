@@ -113,7 +113,7 @@ class Order_lines(db.Model):
 
     # represents object when we query for it
     def __repr__(self):
-        return '<cart_id {}>'.format(self.cart_id)
+        return '<id {}>'.format(self.id)
 
 class Orders(db.Model):
     __tablename__ = 'orders'

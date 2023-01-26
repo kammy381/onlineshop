@@ -99,8 +99,15 @@ def logout():
 @app.route('/dashboard', methods=["GET","POST"])
 @login_required
 def dashboard():
+    orders= Orders.query.filter(Orders.user_id == current_user.id)
 
-    return render_template('dashboard.html')
+    #this is a list of orderlists
+    order_list=[]
+    for order in orders:
+        order_items= Order_lines.query.filter(Order_lines.order_id==order.id).order_by(Order_lines.updated_at).all()
+        order_list.append(order_items)
+
+    return render_template('dashboard.html', order_items=order_list)
 
 @app.route("/createuser", methods=['GET','POST'])
 def user_form():
@@ -508,7 +515,6 @@ def payment(order_id,user_id):
 
 @app.route("/shoppingcart/order")
 def order():
-    #need to prevent user from placing thesame order
 
     full_name='get from form'
 
@@ -533,7 +539,17 @@ def order():
     #creates a payment
     payment(order.id,user_id)
 
+    #create a site ############
+    # also make a thing to pull fullname and maybe add bank number, put it online########
+
+    cart = db.session.query(Carts).filter(Carts.id == session['cart']).first()
+    #delete cart from db
+    db.session.delete(cart)
+    db.session.commit()
     #delete cart from session
+    session.pop('cart')
+
+
     if user_id is not None:
         flash('Order successful! You can view your order in your dashboard')
     else:
