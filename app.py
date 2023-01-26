@@ -14,7 +14,8 @@ app = Flask(__name__)
 #rich text editor init
 ckeditor = CKEditor(app)
 
-env_config = os.getenv("APP_SETTINGS", "config.DevelopmentConfig")
+#env_config = os.getenv("APP_SETTINGS", "config.DevelopmentConfig")
+env_config = os.getenv("APP_SETTINGS", "config.ProductionConfig")
 app.config.from_object(env_config)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
 
