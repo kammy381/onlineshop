@@ -108,7 +108,12 @@
 
                   <p class="mb-5">This site is fake, so you can't really buy anything <a href="{{ url_for('about_me') }}">read more</a>.</p>
                   <div class="d-grid gap-2">
-                    <a href="{{url_for('order')}}" class="btn btn-primary">Buy now</a>
+                    {% if total_price %}
+                    <a href="{{url_for('order')}}" class="btn btn-primary" >Buy now</a>
+                    {% else %}
+                    <a href="" class="btn btn-secondary" >Buy now</a>
+                    {% endif %}
+
                   </div>
                   <h5 class="fw-bold mb-5" style="position: absolute; bottom: 0;">
                     <a href="/" style="text-decoration: none"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-left" viewBox="0 0 16 16"><path d="M10 12.796V3.204L4.519 8 10 12.796zm-.659.753-5.48-4.796a1 1 0 0 1 0-1.506l5.48-4.796A1 1 0 0 1 11 3.204v9.592a1 1 0 0 1-1.659.753z"/></svg>Back to shopping</a>
