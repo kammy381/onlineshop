@@ -113,13 +113,6 @@ def dashboard():
 
 @app.route("/createuser", methods=['GET','POST'])
 def user_form():
-    username = None
-    email = None
-    password_hash = None
-    address = None
-    postal_code = None
-    city = None
-    country = None
 
     form = UserForm()
     if form.validate_on_submit():
@@ -139,22 +132,12 @@ def user_form():
             db.session.add(user)
             db.session.commit()
 
-            form.username.data = ''
-            form.email.data = ''
-            form.password_hash.data = ''
-            form.address.data = ''
-            form.postal_code.data = ''
-            form.city.data = ''
-            form.country.data = ''
-
             flash("Great Succes!  Account created succesfully")
             return redirect(url_for('login'))
         else:
             flash("This email is already in use!")
 
-
     return render_template('createuser.html', form=form)
-
 @app.route('/updateuser/<int:id>', methods=['GET','POST'])   #methods=['PATCH']
 @login_required
 def update_user(id):
@@ -209,10 +192,6 @@ def delete_user(id):
 @app.route("/addproduct", methods=['GET','POST'])
 @login_required
 def product_form():
-    name = None
-    price = None
-    image_url = None
-    description = None
 
     form = ProductForm()
     if form.validate_on_submit():
@@ -228,12 +207,8 @@ def product_form():
         db.session.add(product)
         db.session.commit()
 
-        form.name.data = ''
-        form.price.data = ''
-        form.image_url.data = ''
-        form.description.data = ''
-
         flash("Great Succes!  Product submitted succesfully")
+        return redirect(url_for('product_form'))
 
     return render_template('addproduct.html', form=form)
 @app.route('/updateproduct/<int:id>', methods=['GET','POST'])
@@ -273,7 +248,7 @@ def delete_product(id):
     user_id = current_user.id
     if user_id == product_to_delete.user.id or user_id==admin:
         try:
-            ## delete from cart_items and from orderlines##################################
+############ delete from cart_items and from orderlines#################################################################
             db.session.delete(product_to_delete)
             db.session.commit()
             flash("Product deleted!")

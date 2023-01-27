@@ -19,7 +19,6 @@ class Products(db.Model):
     #posted by
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
-
     ##
     cart_items = db.relationship('Cart_items', backref='product')
     order_lines = db.relationship('Order_lines', backref='product')
