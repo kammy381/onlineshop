@@ -517,48 +517,49 @@ def payment(order_id,user_id):
 
 @app.route("/shoppingcart/order")
 def order():
+    if 'cart' in session:
+        full_name='get from form'
 
-    full_name='get from form'
+        #user not logged in
+        if current_user.is_anonymous:
+            user_id=None
+        #user logged in
+        else:
+            user_id=current_user.id
 
-    #user not logged in
-    if current_user.is_anonymous:
-        user_id=None
-    #user logged in
+        created_at=datetime.now()
+        updated_at=datetime.now()
+
+        order=Orders(full_name=full_name,user_id=user_id,created_at=created_at,updated_at=updated_at)
+
+        db.session.add(order)
+        db.session.commit()
+    ###
+        #creates order_lines after order has been made
+        order_line(order.id)
+
+        #creates a payment
+        payment(order.id,user_id)
+
+
+        # also make a thing to pull fullname and maybe add bank number########
+
+        cart = db.session.query(Carts).filter(Carts.id == session['cart']).first()
+
+        #delete cart from db
+        db.session.delete(cart)
+        db.session.commit()
+        #delete cart from session
+        session.pop('cart')
+
+
+        if user_id is not None:
+            flash('Order successful! You can view your order in your dashboard')
+        else:
+            flash("Order successful!")
+        return redirect(url_for('index'))
     else:
-        user_id=current_user.id
-
-    created_at=datetime.now()
-    updated_at=datetime.now()
-
-    order=Orders(full_name=full_name,user_id=user_id,created_at=created_at,updated_at=updated_at)
-
-    db.session.add(order)
-    db.session.commit()
-
-    #creates order_lines after order has been made
-    order_line(order.id)
-
-    #creates a payment
-    payment(order.id,user_id)
-
-    #create a site ############
-    # also make a thing to pull fullname and maybe add bank number, put it online########
-
-    cart = db.session.query(Carts).filter(Carts.id == session['cart']).first()
-    #delete cart from db
-    db.session.delete(cart)
-    db.session.commit()
-    #delete cart from session
-    session.pop('cart')
-
-
-    if user_id is not None:
-        flash('Order successful! You can view your order in your dashboard')
-    else:
-        flash("Order successful!")
-
-
-    return redirect(url_for('index'))
+        return redirect(url_for('index'))
 
 
 #errors
