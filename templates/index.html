@@ -23,7 +23,10 @@
         </div>
         <div class="card-footer">
           <strong>Price: </strong>€{{'%.2f' % product.price }}
-          <a href="{{ url_for('show_detail',target_id=product['id']) }}" class="btn btn-primary float-end " >Details</a>
+          <div class="btn-group float-end" role="group" aria-label="Basic example">
+              <a href="{{ url_for('show_detail',target_id=product['id']) }}" class="btn btn-primary  " >Details</a>
+              <a href="{{ url_for('add_to_cart',target_id=product['id']) }}" class="btn btn-primary   "><span class="material-icons" style="color: rgb(255, 255, 255)">shopping_cart</span></a>
+          </div>
         </div>
 
       </div>
