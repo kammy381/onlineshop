@@ -29,6 +29,8 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view='login'
 
+#admin  it's just user id=1 from db
+admin=1
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -159,7 +161,7 @@ def update_user(id):
     form = UserForm()
     thing_to_update= Users.query.get_or_404(id)
     user_id = current_user.id
-    if user_id == thing_to_update.id or user_id==19: #adminkammy:
+    if user_id == thing_to_update.id or user_id==admin:
         if request.method =='POST':
             thing_to_update.username=request.form['username']
             thing_to_update.email=request.form['email']
@@ -189,7 +191,7 @@ def delete_user(id):
     user_to_delete = Users.query.get_or_404(id)
     user_id = current_user.id
     form = UserForm()
-    if user_id == user_to_delete.id or user_id==19: #adminkammy:
+    if user_id == user_to_delete.id or user_id==admin:
         try:
             db.session.delete(user_to_delete)
             db.session.commit()
@@ -240,7 +242,7 @@ def update_product(id):
     form = ProductForm()
     thing_to_update= Products.query.get_or_404(id)
     user_id = current_user.id
-    if user_id == thing_to_update.user.id or user_id==19: #adminkammy
+    if user_id == thing_to_update.user.id or user_id==admin:
         if form.validate_on_submit():
             thing_to_update.name=form.name.data
             thing_to_update.price=form.price.data
@@ -269,7 +271,7 @@ def update_product(id):
 def delete_product(id):
     product_to_delete = Products.query.get_or_404(id)
     user_id = current_user.id
-    if user_id == product_to_delete.user.id or user_id==19: #adminkammy:
+    if user_id == product_to_delete.user.id or user_id==admin:
         try:
             ## delete from cart_items and from orderlines##################################
             db.session.delete(product_to_delete)
