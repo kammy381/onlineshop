@@ -8,7 +8,6 @@
 
 {% block content %}
 
-
     <h2>Products</h2>
     <div class="mygridcontainer">
       {% if products.items %}
@@ -18,7 +17,8 @@
         <img src={{product.image_url}} class="card-img-top" alt="cube image" style="height:250px;max-width:250px; display: block; margin-left:auto; margin-right:auto;width:auto;">
         <div class="card-header"><h5 style="text-align: center">{{product.name}}</h5></div>
         <div class="card-body">
-          <div style=" --max-lines: 3; --line-height: 1.4; max-height: calc(var(--max-lines) * 1em * var(--line-height)); line-height: var(--line-height); text-overflow: ellipsis; overflow: hidden; " >{{product.description|safe}}</div>
+            <!-- elipsis doesn't work -->
+          <div style=" --max-lines: 3; --line-height: 1.4; max-height: calc(var(--max-lines) * 1em * var(--line-height)); line-height: var(--line-height); overflow: hidden " >{{product.description|safe}}</div>
 
         </div>
         <div class="card-footer">

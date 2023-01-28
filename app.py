@@ -423,11 +423,26 @@ def delete_from_cart(item_id):
         return redirect(url_for('shoppingcart'))
 
 
-#passing stuff to layout html page
+#passing searchbar to layout html page
 @app.context_processor
-def passthrough():
+def passthrough_searchbar():
     form= SearchForm()
     return dict(form=form)
+
+#passing cartitem amount to layout html page
+@app.context_processor
+def passthrough_cart():
+
+    if 'cart' in session:
+        cartnumber = session['cart']
+        cart_items = db.session.query(Cart_items).filter(Cart_items.cart_id == cartnumber).all()
+        amount = 0
+        for item in cart_items:
+            amount += item.quantity
+    else:
+        amount=0
+
+    return dict(amount=amount)
 
 @app.route('/search', methods=['POST'])
 def search():
@@ -441,7 +456,6 @@ def search():
 
         return render_template('index.html',form=form, products=products)
     return render_template('index.html', form=form, products = Products.query.order_by(Products.updated_at).paginate(page=page, per_page=8))
-
 
 @app.route("/productpage/<string:target_id>")
 def show_detail(target_id):
@@ -469,7 +483,6 @@ def order_line(order_id):
         db.session.add(orderline)
 
     db.session.commit()
-
 
 def payment(order_id,user_id):
 
@@ -535,7 +548,6 @@ def order():
         return redirect(url_for('index'))
     else:
         return redirect(url_for('index'))
-
 
 #errors
 @app.errorhandler(404)
