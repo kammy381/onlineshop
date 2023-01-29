@@ -6,7 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
 from webforms import ProductForm, UserForm, LoginForm, SearchForm
 from flask_ckeditor import CKEditor
-
+from mollie.api.client import Client
 
 
 app = Flask(__name__)
@@ -29,7 +29,11 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view='login'
 
-#admin  it's just user id=1 from db
+#mollie
+#mollie_client = Client()
+#mollie_client.set_api_key('paste the key here') ##real test key, move to .env
+
+#admin  it's just user id=1 from db, needs to be sent to each site that checks for admin in template
 admin=1
 
 @login_manager.user_loader
@@ -85,6 +89,8 @@ def login():
                 login_user(user)
                 check_cart(user)
 
+                print(current_user.id)
+                print(admin)
                 flash('You have successfully logged in!')
                 return redirect(url_for('dashboard'))
 
@@ -464,7 +470,7 @@ def show_detail(target_id):
         return render_template('error.html')
     else:
 
-        return render_template('productpage.html', product=product)
+        return render_template('productpage.html', product=product, admin=admin)
 
 def order_line(order_id):
     cart=session['cart']
