@@ -89,8 +89,6 @@ def login():
                 login_user(user)
                 check_cart(user)
 
-                print(current_user.id)
-                print(admin)
                 flash('You have successfully logged in!')
                 return redirect(url_for('dashboard'))
 
