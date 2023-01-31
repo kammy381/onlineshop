@@ -30,6 +30,11 @@
   <a href="{{url_for('delete_user', id=current_user.id)}}" class="btn btn-danger float-end">Delete Account</a>
 </div>
 
+
+{% if order_items %}
+<H2>Your orders</H2>
+
+{% for list in order_items %}
 <!-- shoppingcart recycled -->
 <section class="h-100 h-custom" >
   <div class="container h-100 py-5">
@@ -41,10 +46,8 @@
             <div class="row">
               <div class="col-lg-6 px-5 py-4">
 
-                <h3 class="mb-5 pt-2 text-center fw-bold text-uppercase">Your orders</h3>
+                <h4 class="mb-5 pt-2 text-center fw-bold text-uppercase">Date ordered: {{ list[0].orders.created_at.date() }} </h4>
 
-                {% if order_items %}
-                {% for list in order_items %}
                 {% for item in list %}
 
                 <div class="d-flex align-items-center mb-5">
@@ -68,15 +71,7 @@
                 </div>
 
                 {% endfor %}
-                {% endfor %}
 
-                {% else %}
-                You haven't ordered anything yet!
-
-                {% endif %}
-
-
-                </div>
               </div>
             </div>
           </div>
@@ -85,6 +80,13 @@
     </div>
   </div>
 </section>
+
+{% endfor %}
+
+{% else %}
+You haven't ordered anything yet!
+
+{% endif %}
 
 
 

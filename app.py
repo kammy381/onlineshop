@@ -29,12 +29,18 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view='login'
 
+
 #mollie
-#mollie_client = Client()
-#mollie_client.set_api_key('paste the key here') ##real test key, move to .env
+mollie_key=os.getenv("MOLLIE_KEY")
+mollie_client = Client()
+mollie_client.set_api_key(mollie_key)
+
+####need normal url    get_public_url()
+PUBLIC_URL = 'https://bffa-2a02-a46e-fa6f-1-b1c7-b2d5-b338-75a7.eu.ngrok.io'
 
 #admin  it's just user id=1 from db, needs to be sent to each site that checks for admin in template
 admin=1
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -105,7 +111,7 @@ def logout():
 @app.route('/dashboard', methods=["GET","POST"])
 @login_required
 def dashboard():
-    orders= Orders.query.filter(Orders.user_id == current_user.id)
+    orders= Orders.query.filter(Orders.user_id == current_user.id).order_by(Orders.updated_at.desc())
 
     #this is a list of orderlists
     order_list=[]
@@ -114,7 +120,6 @@ def dashboard():
         order_list.append(order_items)
 
     return render_template('dashboard.html', order_items=order_list)
-
 @app.route("/createuser", methods=['GET','POST'])
 def user_form():
 
@@ -488,14 +493,15 @@ def order_line(order_id):
 
     db.session.commit()
 
-def payment(order_id,user_id):
+def payment_fl(order_id,user_id):
 
     ordered_items = db.session.query(Order_lines).filter(Order_lines.order_id == order_id).all()
     price = 0
     for item in ordered_items:
         price += (item.price_per_unit * item.quantity)
 
-
+    #total price needs to be 2decimals for mollie
+    price='{0:.2f}'.format(price)
     payment= Payments(
         amount=price,
         order_id=order_id,
@@ -507,9 +513,13 @@ def payment(order_id,user_id):
     db.session.add(payment)
     db.session.commit()
 
+    return price
+
+
 @app.route("/shoppingcart/order")
 def order():
     if 'cart' in session:
+
         full_name='get from form'
 
         #user not logged in
@@ -526,18 +536,34 @@ def order():
 
         db.session.add(order)
         db.session.commit()
-    ###
+
         #creates order_lines after order has been made
         order_line(order.id)
 
-        #creates a payment
-        payment(order.id,user_id)
+        #creates a payment and return price
+        price=payment_fl(order.id,user_id)
 
+
+        #mollie create payment
+        payment = mollie_client.payments.create({
+            'amount': {
+                'currency': 'EUR',
+                'value': f'{price}'
+            },
+            'description': 'Thank you for shopping with us :)',
+            'redirectUrl': f'{PUBLIC_URL}/shoppingcart/order/{order.id}',
+            'webhookUrl': f'{PUBLIC_URL}/mollie-webhook/',
+            'metadata': {"webshop_order_id": str(order.id)},
+        })
+
+        print(payment.id)
+        print(payment.status)
 
         # also make a thing to pull fullname and maybe add bank number########
+#
 
+        #delete cart after payment is done, need to replace
         cart = db.session.query(Carts).filter(Carts.id == session['cart']).first()
-
         #delete cart from db
         db.session.delete(cart)
         db.session.commit()
@@ -545,13 +571,22 @@ def order():
         session.pop('cart')
 
 
-        if user_id is not None:
-            flash('Order successful! You can view your order in your dashboard')
-        else:
-            flash("Order successful!")
-        return redirect(url_for('index'))
+        ###
+
+        # if user_id is not None:
+        #     flash('Order successful! You can view your order in your dashboard')
+        # else:
+        #     flash("Order successful!")
+        #return redirect(url_for('index'))
+        return redirect(payment.checkout_url)
     else:
         return redirect(url_for('index'))
+
+@app.route("/shoppingcart/order/<id>")
+def order_view(id):
+    order_items = Order_lines.query.filter(Order_lines.order_id == id).order_by(Order_lines.updated_at).all()
+
+    return render_template('orderview.html', order_items=order_items)
 
 #errors
 @app.errorhandler(404)
@@ -561,6 +596,3 @@ def page_not_found(anything):
 if __name__ == '__main__':
     app.run()
 
-
-
-#app.run(host='0.0.0.0', port=81)
