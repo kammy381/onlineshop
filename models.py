@@ -191,6 +191,7 @@ class Payments(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     amount = db.Column(db.Float)
+    mollie_id = db.Column(db.String(50))
     order_id = db.Column(db.Integer, db.ForeignKey('orders.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     status = db.Column(db.String(20))
@@ -198,9 +199,10 @@ class Payments(db.Model):
     updated_at = db.Column(db.DateTime)
 
     # runs when we create a new one
-    def __init__(self, amount, order_id, user_id, status, created_at, updated_at):
+    def __init__(self, amount,mollie_id, order_id, user_id, status, created_at, updated_at):
         #self.id = id
         self.amount = amount
+        self.mollie_id=mollie_id
         self.order_id = order_id
         self.user_id = user_id
         self.status = status

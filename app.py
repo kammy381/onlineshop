@@ -1,4 +1,4 @@
-from flask import Flask, render_template, flash, request, redirect, url_for, session
+from flask import Flask, render_template, flash, request, redirect, url_for, session, abort
 from flask_sqlalchemy import SQLAlchemy
 import os
 from datetime import datetime
@@ -7,6 +7,7 @@ from flask_login import UserMixin, login_user, LoginManager, login_required, log
 from webforms import ProductForm, UserForm, LoginForm, SearchForm
 from flask_ckeditor import CKEditor
 from mollie.api.client import Client
+from mollie.api.error import Error
 
 
 app = Flask(__name__)
@@ -29,12 +30,19 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view='login'
 
+
 #mollie
-#mollie_client = Client()
-#mollie_client.set_api_key('paste the key here') ##real test key, move to .env
+mollie_key=os.getenv("MOLLIE_KEY")
+mollie_client = Client()
+mollie_client.set_api_key(mollie_key)
+
+####need normal url
+PUBLIC_URL = request.url_root
+#PUBLIC_URL = 'ngrok url'
 
 #admin  it's just user id=1 from db, needs to be sent to each site that checks for admin in template
 admin=1
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -105,16 +113,16 @@ def logout():
 @app.route('/dashboard', methods=["GET","POST"])
 @login_required
 def dashboard():
-    orders= Orders.query.filter(Orders.user_id == current_user.id)
+    orders= Orders.query.filter(Orders.user_id == current_user.id).order_by(Orders.updated_at.desc())
 
     #this is a list of orderlists
     order_list=[]
     for order in orders:
+
         order_items= Order_lines.query.filter(Order_lines.order_id==order.id).order_by(Order_lines.updated_at).all()
         order_list.append(order_items)
 
     return render_template('dashboard.html', order_items=order_list)
-
 @app.route("/createuser", methods=['GET','POST'])
 def user_form():
 
@@ -369,7 +377,7 @@ def add_to_cart(target_id):
     else:
         #already has a cart
         if 'cart' in session:
-            cartnumber=session['cart']
+            cartnumber = session['cart']
         #create a cart
         else:
             full_name = None
@@ -425,7 +433,6 @@ def delete_from_cart(item_id):
     else:
         flash("Not your product! You can't remove this one!")
         return redirect(url_for('shoppingcart'))
-
 
 #passing searchbar to layout html page
 @app.context_processor
@@ -488,28 +495,23 @@ def order_line(order_id):
 
     db.session.commit()
 
-def payment(order_id,user_id):
+#function to calculate the total price given order.id
+def calc_price(order_id):
 
     ordered_items = db.session.query(Order_lines).filter(Order_lines.order_id == order_id).all()
     price = 0
     for item in ordered_items:
         price += (item.price_per_unit * item.quantity)
 
+    #total price needs to be 2decimals for mollie
+    price='{0:.2f}'.format(price)
 
-    payment= Payments(
-        amount=price,
-        order_id=order_id,
-        user_id=user_id,
-        status='succeeded',
-        created_at=datetime.now(),
-        updated_at=datetime.now()
-    )
-    db.session.add(payment)
-    db.session.commit()
+    return price
 
 @app.route("/shoppingcart/order")
 def order():
     if 'cart' in session:
+
         full_name='get from form'
 
         #user not logged in
@@ -522,36 +524,119 @@ def order():
         created_at=datetime.now()
         updated_at=datetime.now()
 
-        order=Orders(full_name=full_name,user_id=user_id,created_at=created_at,updated_at=updated_at)
+        order = Orders(full_name=full_name,user_id=user_id,created_at=created_at,updated_at=updated_at)
 
         db.session.add(order)
         db.session.commit()
-    ###
+
         #creates order_lines after order has been made
         order_line(order.id)
 
-        #creates a payment
-        payment(order.id,user_id)
+        #calculate the total price
+        price=calc_price(order.id)
 
+        try:
+            #mollie create payment
+            payment = mollie_client.payments.create({
+                'amount': {
+                    'currency': 'EUR',
+                    'value': f'{price}'
+                },
+                'description': 'Thank you for shopping with us :)',
+                'redirectUrl': f'{PUBLIC_URL}/shoppingcart/order/{order.id}',
+                'webhookUrl': f'{PUBLIC_URL}/mollie-webhook/',
+                'metadata': {"webshop_order_id": str(order.id)},
+            })
+        except Error as err:
+            return render_template('error.html', err=err)
+
+
+        #creates a payment in db
+        payment_db = Payments(
+            amount=price,
+            order_id=order.id,
+            user_id=user_id,
+            mollie_id=payment.id,
+            status=payment.status,
+            created_at=datetime.now(),
+            updated_at=datetime.now()
+        )
+        db.session.add(payment_db)
+        db.session.commit()
+
+
+        session['key'] = generate_password_hash(str(order.id), "sha256")
 
         # also make a thing to pull fullname and maybe add bank number########
 
+        #delete cart after payment is done, need to replace
         cart = db.session.query(Carts).filter(Carts.id == session['cart']).first()
-
         #delete cart from db
         db.session.delete(cart)
         db.session.commit()
         #delete cart from session
         session.pop('cart')
 
-
-        if user_id is not None:
-            flash('Order successful! You can view your order in your dashboard')
-        else:
-            flash("Order successful!")
-        return redirect(url_for('index'))
+        return redirect(payment.checkout_url)
     else:
         return redirect(url_for('index'))
+
+@app.route("/shoppingcart/order/<id>")
+def order_view(id):
+    if not 'key' in session:
+        err = "Your order page timed out, or it's not your order!"
+        return render_template('error.html', err=err)
+    else:
+        if not check_password_hash(session['key'], str(id)):
+            err = "Your order page timed out, or it's not your order!"
+            return render_template('error.html', err=err)
+        else:
+            order_items = Order_lines.query.filter(Order_lines.order_id == id).order_by(Order_lines.updated_at).all()
+
+            #getting status from database (the status gets updated in the webhook)
+            payment_db = Payments.query.filter(Payments.order_id == id).first()
+            status = payment_db.status
+
+            return render_template('orderview.html', order_items=order_items, status=status)
+
+@app.route("/mollie-webhook/", methods=['POST'])
+def webhook():
+    if request.method == "POST":
+        try:
+            if "id" not in request.form:
+                abort(404, "Unknown payment id")
+            payment_id = request.form['id']
+            payment= mollie_client.payments.get(payment_id)
+            order_id = int(payment.metadata["webshop_order_id"])
+
+            payment_db = Payments.query.filter(Payments.order_id == order_id).first()
+
+            status = payment.status
+
+            payment_db.updated_at = datetime.now()
+            payment_db.status = status
+
+            db.session.add(payment_db)
+            db.session.commit()
+
+            if payment.is_paid():
+                #if there was a shipment thing, it would start now
+                return "paid"
+            elif payment.is_pending():
+                #payment not complete yet
+                return "pending"
+            elif payment.is_open():
+                #payment has not started yet
+                return "open"
+            else:
+                #the payment is not paid, pending nor open, so probably aborted
+                return 'cancelled'
+
+
+        except Error as err:
+            return render_template('error.html', err=err)
+    else:
+        abort(400)
 
 #errors
 @app.errorhandler(404)
@@ -561,6 +646,3 @@ def page_not_found(anything):
 if __name__ == '__main__':
     app.run()
 
-
-
-#app.run(host='0.0.0.0', port=81)
