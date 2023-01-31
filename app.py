@@ -36,8 +36,9 @@ mollie_key=os.getenv("MOLLIE_KEY")
 mollie_client = Client()
 mollie_client.set_api_key(mollie_key)
 
-####need normal url    get_public_url()
-PUBLIC_URL = 'https://b198-2a02-a46e-fa6f-1-6102-daef-7fbf-3a85.eu.ngrok.io'
+####need normal url
+PUBLIC_URL = request.url_root
+#PUBLIC_URL = 'ngrok url'
 
 #admin  it's just user id=1 from db, needs to be sent to each site that checks for admin in template
 admin=1
@@ -507,7 +508,6 @@ def calc_price(order_id):
 
     return price
 
-
 @app.route("/shoppingcart/order")
 def order():
     if 'cart' in session:
@@ -524,7 +524,7 @@ def order():
         created_at=datetime.now()
         updated_at=datetime.now()
 
-        order=Orders(full_name=full_name,user_id=user_id,created_at=created_at,updated_at=updated_at)
+        order = Orders(full_name=full_name,user_id=user_id,created_at=created_at,updated_at=updated_at)
 
         db.session.add(order)
         db.session.commit()
