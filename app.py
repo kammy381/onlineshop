@@ -36,8 +36,8 @@ mollie_key=os.getenv("MOLLIE_KEY")
 mollie_client = Client()
 mollie_client.set_api_key(mollie_key)
 
-####need normal url
-PUBLIC_URL = request.url_root
+####need normal url    request.url_root
+PUBLIC_URL = request.url
 #PUBLIC_URL = 'ngrok url'
 
 #admin  it's just user id=1 from db, needs to be sent to each site that checks for admin in template
