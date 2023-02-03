@@ -75,20 +75,26 @@
 
                 <h3 class="mb-5 pt-2 text-center fw-bold text-uppercase">Payment</h3>
 
-                <form class="mb-5">
+                <form class="mb-5" action="{{url_for('order')}}" method="POST">
 
                   <div class="form-outline mb-5">
-                    <input type="text" id="fullname" class="form-control form-control-lg" size="17"
-                      value="placeholdername" minlength="19" maxlength="19" />
-                    <label class="form-label" for="typeText">Full name</label>
+                    {% if current_user.is_authenticated %}
+                    <input type="text" id="fullname"  name="fullname" class="form-control form-control-lg" size="17" required minlength="2" maxlength="19" />
+                    {% else %}
+                    <input type="text" id="fullname" name="fullname" class="form-control form-control-lg" size="17" required minlength="2" maxlength="19" />
+                    {% endif %}
+                    <label class="form-label" for="fullname">Full name</label>
                   </div>
 
                   <div class="form-outline mb-5">
-                    <input type="text" id="typeName" class="form-control form-control-lg" size="17"
-                      value="tempemail" />
-                    <label class="form-label" for="typeName">Email</label>
+                    {% if current_user.is_authenticated %}
+                    <input type="text" id="email" name="email" class="form-control form-control-lg" size="17"  value={{ current_user.email }} required minlength="2"/>
+                    {% else %}
+                    <input type="text" id="email" name="email" class="form-control form-control-lg" size="17" value=""  required minlength="2"/>
+                    {% endif %}
+                    <label class="form-label" for="email">Email</label>
                   </div>
-
+<!--   can be added for a creditcart, not needed now
                   <div class="row">
                     <div class="col-md-6 mb-5">
                       <div class="form-outline">
@@ -105,11 +111,12 @@
                       </div>
                     </div>
                   </div>
-
-                  <p class="mb-5">This site is fake, so you can't really buy anything <a href="{{ url_for('about_me') }}">read more</a>.</p>
+-->
+                  <p class="mb-5">This site is a project, you can't really buy anything, no money will be charged and nothing will be sent. <a href="{{ url_for('about_me') }}">read more</a>.</p>
                   <div class="d-grid gap-2">
                     {% if total_price %}
-                    <a href="{{url_for('order')}}" class="btn btn-primary" >Buy now</a>
+                    <button class="btn btn-primary" type="submit"> Buy now </button>
+
                     {% else %}
                     <a href="" class="btn btn-secondary" >Buy now</a>
                     {% endif %}
