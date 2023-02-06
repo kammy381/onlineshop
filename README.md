@@ -7,3 +7,7 @@ Most recent version is in the deploy branch: https://github.com/kammy381/onlines
 ## Goals for this project
 
 ## Little preview
+
+
+https://user-images.githubusercontent.com/114948121/216990463-8e0bb0dd-8776-47ae-9799-8ca71d6ba85c.mp4
+
