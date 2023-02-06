@@ -286,10 +286,11 @@ def index():
 def how_to_solve():
     return render_template('howtosolve.html')
 
+###this runs on pyscript, testing out some fun things on the page. Not accesible through the navbar.
 @app.route("/timer")
 def timer():
     return render_template('timer.html')
-
+#####
 @app.route("/aboutme")
 def about_me():
     return render_template('aboutme.html')
@@ -508,78 +509,85 @@ def calc_price(order_id):
 
     return price
 
-@app.route("/shoppingcart/order")
+@app.route("/shoppingcart/order", methods=['POST'])
 def order():
-    if 'cart' in session:
-
-        full_name='get from form'
-
-        #user not logged in
-        if current_user.is_anonymous:
-            user_id=None
-        #user logged in
-        else:
-            user_id=current_user.id
-
-        created_at=datetime.now()
-        updated_at=datetime.now()
-
-        order = Orders(full_name=full_name,user_id=user_id,created_at=created_at,updated_at=updated_at)
-
-        db.session.add(order)
-        db.session.commit()
-
-        #creates order_lines after order has been made
-        order_line(order.id)
-
-        #calculate the total price
-        price=calc_price(order.id)
-
-        try:
-            #mollie create payment
-            payment = mollie_client.payments.create({
-                'amount': {
-                    'currency': 'EUR',
-                    'value': f'{price}'
-                },
-                'description': 'Thank you for shopping with us :)',
-                'redirectUrl': f'{PUBLIC_URL}/shoppingcart/order/{order.id}',
-                'webhookUrl': f'{PUBLIC_URL}/mollie-webhook/',
-                'metadata': {"webshop_order_id": str(order.id)},
-            })
-        except Error as err:
-            return render_template('error.html', err=err)
-
-
-        #creates a payment in db
-        payment_db = Payments(
-            amount=price,
-            order_id=order.id,
-            user_id=user_id,
-            mollie_id=payment.id,
-            status=payment.status,
-            created_at=datetime.now(),
-            updated_at=datetime.now()
-        )
-        db.session.add(payment_db)
-        db.session.commit()
-
-
-        session['key'] = generate_password_hash(str(order.id), "sha256")
-
-        # also make a thing to pull fullname and maybe add bank number########
-
-        #delete cart after payment is done, need to replace
-        cart = db.session.query(Carts).filter(Carts.id == session['cart']).first()
-        #delete cart from db
-        db.session.delete(cart)
-        db.session.commit()
-        #delete cart from session
-        session.pop('cart')
-
-        return redirect(payment.checkout_url)
+    if not request.method == "POST":
+        return redirect(url_for('shoppingcart'))
     else:
-        return redirect(url_for('index'))
+        if 'cart' in session:
+
+            full_name= request.form["fullname"]
+            email= request.form["email"]
+
+            ##nothing happens to emailadress, there could be confirmation email sent from order_view or webhook
+            #this mail should be saved with payments or order
+
+            #user not logged in
+            if current_user.is_anonymous:
+                user_id=None
+            #user logged in
+            else:
+                user_id=current_user.id
+
+            created_at=datetime.now()
+            updated_at=datetime.now()
+
+            order = Orders(full_name=full_name,user_id=user_id,created_at=created_at,updated_at=updated_at)
+
+            db.session.add(order)
+            db.session.commit()
+
+            #creates order_lines after order has been made
+            order_line(order.id)
+
+            #calculate the total price
+            price=calc_price(order.id)
+
+            try:
+                #mollie create payment
+                payment = mollie_client.payments.create({
+                    'amount': {
+                        'currency': 'EUR',
+                        'value': f'{price}'
+                    },
+                    'description': 'Thank you for shopping with us :)',
+                    'redirectUrl': f'{PUBLIC_URL}/shoppingcart/order/{order.id}',
+                    'webhookUrl': f'{PUBLIC_URL}/mollie-webhook/',
+                    'metadata': {"webshop_order_id": str(order.id)},
+                })
+            except Error as err:
+                return render_template('error.html', err=err)
+
+
+            #creates a payment in db
+            payment_db = Payments(
+                amount=price,
+                order_id=order.id,
+                user_id=user_id,
+                mollie_id=payment.id,
+                status=payment.status,
+                created_at=datetime.now(),
+                updated_at=datetime.now()
+            )
+            db.session.add(payment_db)
+            db.session.commit()
+
+
+            session['key'] = generate_password_hash(str(order.id), "sha256")
+
+            # also make a thing to pull fullname and maybe add bank number########
+
+            #delete cart after payment is done, need to replace
+            cart = db.session.query(Carts).filter(Carts.id == session['cart']).first()
+            #delete cart from db
+            db.session.delete(cart)
+            db.session.commit()
+            #delete cart from session
+            session.pop('cart')
+
+            return redirect(payment.checkout_url)
+        else:
+            return redirect(url_for('index'))
 
 @app.route("/shoppingcart/order/<id>")
 def order_view(id):
