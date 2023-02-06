@@ -286,11 +286,11 @@ def index():
 def how_to_solve():
     return render_template('howtosolve.html')
 
-###this runs on pyscript
+###this runs on pyscript, testing out some fun things on the page. Not accesible through the navbar.
 @app.route("/timer")
 def timer():
     return render_template('timer.html')
-
+#####
 @app.route("/aboutme")
 def about_me():
     return render_template('aboutme.html')

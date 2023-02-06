@@ -52,8 +52,9 @@
           </ul>
               <a class="nav-link active" aria-current="page" href="/shoppingcart"> <span class="material-icons" style="color: rgb(255, 255, 255)">shopping_cart</span> {% if 'cart' in session %} <span class="badge badge-light">{{ amount }} </span> {% endif %}</a>&emsp;&emsp;
 
-
+              <!--  testing page
               <a class="nav-link active" href="/timer"><strong style="font-size: 17px; color:white">Pyscript</strong></a>&emsp;
+              -->
               <a class="nav-link active" href="/howtosolve"><strong style="font-size: 17px; color:white">How to solve</strong></a>&emsp;
             {% if current_user.is_authenticated %}
               <a class="nav-link active" href="/addproduct"><strong style="font-size: 17px; color:white">Add a product</strong></a>&emsp;
