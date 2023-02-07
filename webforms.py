@@ -1,11 +1,11 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, DecimalField, TextAreaField, PasswordField, BooleanField,ValidationError
+from wtforms import StringField, SubmitField, DecimalField, TextAreaField, PasswordField,ValidationError
 from wtforms.validators import DataRequired, NumberRange, URL, Email, EqualTo, Length
 from wtforms.widgets import TextArea
 from flask_ckeditor import CKEditorField
 
 
-
+##add price format so it's 2 decimals
 class ProductForm(FlaskForm):
     name = StringField("Product name:", validators=[DataRequired()])
     price = DecimalField("Price:", validators=[DataRequired(), NumberRange(min=0.01,max=99999)])

@@ -1,0 +1,153 @@
+{% extends "layout.html" %}
+
+{% block title %}   Shoppingcart      {% endblock %}
+
+{% block head %}
+  {{ super() }}
+
+{% endblock %}
+
+{% block content %}
+
+<section class="h-100 h-custom" >
+  <div class="container h-100 py-5">
+    <div class="row d-flex justify-content-center align-items-center h-100">
+      <div class="col">
+        <div class="card shopping-cart" style="border-radius: 15px;">
+          <div class="card-body text-black">
+
+            <div class="row">
+              <div class="col-lg-6 px-5 py-4">
+
+                <h3 class="mb-5 pt-2 text-center fw-bold text-uppercase">Your products</h3>
+
+
+                {% if cart_items %}
+                {% for cart_item in cart_items %}
+
+                <div class="d-flex align-items-center mb-5">
+                  <div class="flex-shrink-0">
+                    <img src="{{cart_item.product.image_url}}"
+                      class="img-fluid" style="width: 150px;" alt="Generic placeholder image">
+                  </div>
+                  <div class="flex-grow-1 ms-3">
+                    <!-- delete button -->
+                    <a href="{{ url_for('delete_from_cart', id=cart_item.id) }}" class="float-end text-black"><h1><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg></h1></a>
+                    <h5 class="text-primary">{{ cart_item.product.name }}</h5>
+                    <!-- subtitle
+                    <h6 style="color: #9e9e9e;">Color: white</h6>
+                    -->
+                    <div class="d-flex align-items-center">
+                      <p class="fw-bold mb-0 me-5 pe-3">€{{'%.2f' % cart_item.product.price }}</p>
+                      <div class="def-number-input number-input safari_only">
+                        <!--  + and - buttons -->
+                        <form action="/shoppingcart/{{ cart_item.id }}/change_quantity" method="POST">
+                          <button onclick="this.parentNode.querySelector('input[type=number]').stepDown()" class="minus" type="submit"></button>
+                          <input class="quantity fw-bold text-black "  min="1" max="99"  name="quantity" value="{{cart_item.quantity}}" type="number" readonly>
+                          <button onclick="this.parentNode.querySelector('input[type=number]').stepUp()" class="plus" type="submit"></button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {% endfor %}
+
+                {% else %}
+                Your shoppingcart is empty!
+
+                {% endif %}
+
+                <hr class="mb-4" style="height: 2px; background-color: #1266f1; opacity: 1;">
+
+
+                <div class="d-flex justify-content-between p-2 mb-2" style="background-color: #e1f5fe;">
+                  <h5 class="fw-bold mb-0">Total:</h5>
+                  {% if total_price %}
+                  <h5 class="fw-bold mb-0">€ {{ '%.2f' % total_price }}</h5>
+                  {% else %}
+                  <h5 class="fw-bold mb-0">€ 0</h5>
+                  {% endif %}
+                </div>
+
+              </div>
+              <div class="col-lg-6 px-5 py-4">
+
+                <h3 class="mb-5 pt-2 text-center fw-bold text-uppercase">Payment</h3>
+
+                <form class="mb-5" action="{{url_for('order')}}" method="POST">
+
+                  <div class="form-outline mb-5">
+                    {% if current_user.is_authenticated %}
+                    <input type="text" id="fullname"  name="fullname" class="form-control form-control-lg" size="17" required minlength="2" maxlength="19" />
+                    {% else %}
+                    <input type="text" id="fullname" name="fullname" class="form-control form-control-lg" size="17" required minlength="2" maxlength="19" />
+                    {% endif %}
+                    <label class="form-label" for="fullname">Full name</label>
+                  </div>
+
+                  <div class="form-outline mb-5">
+                    {% if current_user.is_authenticated %}
+                    <input type="text" id="email" name="email" class="form-control form-control-lg" size="17"  value={{ current_user.email }} required minlength="2"/>
+                    {% else %}
+                    <input type="text" id="email" name="email" class="form-control form-control-lg" size="17" value=""  required minlength="2"/>
+                    {% endif %}
+                    <label class="form-label" for="email">Email</label>
+                  </div>
+<!--   can be added for a creditcart, not needed now
+                  <div class="row">
+                    <div class="col-md-6 mb-5">
+                      <div class="form-outline">
+                        <input type="text" id="typeExp" class="form-control form-control-lg" value="01/22"
+                          size="7" id="exp" minlength="7" maxlength="7" />
+                        <label class="form-label" for="typeExp">Expiration</label>
+                      </div>
+                    </div>
+                    <div class="col-md-6 mb-5">
+                      <div class="form-outline">
+                        <input type="password" id="typeText" class="form-control form-control-lg"
+                          value="&#9679;&#9679;&#9679;" size="1" minlength="3" maxlength="3" />
+                        <label class="form-label" for="typeText">Cvv</label>
+                      </div>
+                    </div>
+                  </div>
+-->
+                  <p class="mb-5">This site is a project, you can't really buy anything, no money will be charged and nothing will be sent. <a href="{{ url_for('about_me') }}">read more</a>.</p>
+                  <div class="d-grid gap-2">
+                    {% if total_price %}
+                    <button class="btn btn-primary" type="submit"> Buy now </button>
+
+                    {% else %}
+                    <a href="" class="btn btn-secondary" >Buy now</a>
+                    {% endif %}
+
+                  </div>
+                  <h5 class="fw-bold mb-5" style="position: absolute; bottom: 0;">
+                    <a href="/" style="text-decoration: none"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-left" viewBox="0 0 16 16"><path d="M10 12.796V3.204L4.519 8 10 12.796zm-.659.753-5.48-4.796a1 1 0 0 1 0-1.506l5.48-4.796A1 1 0 0 1 11 3.204v9.592a1 1 0 0 1-1.659.753z"/></svg>Back to shopping</a>
+                  </h5>
+
+                </form>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--if tab focused,  went to different tab or 'backbutton'=> refresh-->
+  <script>
+
+    window.onfocus = function () {
+    location.reload()
+    isTabActive = true;
+    };
+  </script>
+</section>
+
+
+
+
+
+{% endblock %}

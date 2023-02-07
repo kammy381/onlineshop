@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+
+{% block title %}   Timer  {% endblock %}
+
+{% block head %}
+
+
+<!-- pyscript let's go! -->
+
+<link rel="stylesheet" href="https://pyscript.net/alpha/pyscript.css" />
+<script defer src="https://pyscript.net/alpha/pyscript.js"></script>
+
+<py-env>
+  - paths:
+    - /static/pythonscripts/utils.py
+</py-env>
+
+{{ super() }}
+{% endblock %}
+
+{% block content %}
+
+
+
+<div class="font-mono">timer: <label id="outputDiv"></label></div>
+
+
+<py-script>
+  from utils import now
+  import asyncio
+
+  start=now()
+  async def timer():
+    while True:
+      await asyncio.sleep(0.001)
+      output=now()
+      duration= (output-start)
+
+      Element("outputDiv").write('%.3f' % duration)
+
+
+  pyscript.run_until_complete(timer())
+</py-script>
+
+{% endblock %}

@@ -5,7 +5,12 @@
 
 {% endblock %}
 {% block content %}
-  <h1>Page not found</h1>
+  <h1>Error 404:  Cube broke and so did the site</h1>
+  <h2>page not found</h2>
+  {% if err %}
+  {{ err }}
+  {% endif %}
 
-  <a href="/">Return to Homepage</a>
+  <div><img src="https://www.pngkey.com/png/full/103-1036753_the-all-new-rubiks-speed-cube-broken-rubix.png"></div>
+  <div><a class="btn btn-primary " href="/">Return to Homepage</a></div>
 {% endblock %}

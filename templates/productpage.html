@@ -3,37 +3,37 @@
 {% block head %}
   {{ super() }}
 
+
 {% endblock %}
 {% block content %}
-<br>
-{% for message in get_flashed_messages() %}
-
-  <div class="alert alert-success alert-dismissible fade show" role="alert">
-  <strong>{{ message }}</strong>
-  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-  </div>
-
-{% endfor %}
-
 
 <h1>Product Details</h1>
 
-     <div class="card " style="width: 18rem;">
-        <img src={{product.image_url}} class="card-img-top" alt="cube image" style="max-height:250px;max-width:250px; display: block; margin-left:auto; margin-right:auto; height:auto;width:auto;">
-        <div class="card-header"><h5>{{product.name}}</h5></div>
-        <div class="card-body">
-          <p>{{product.description|safe }}</p>
-          <p><strong>Price: </strong>€{{'%.2f' % product.price }}</p>
-          <p><strong>Added by user: </strong>{{ product.user.username }}</p>
-          <p><strong>Posted at: </strong>{{product.created_at.date() }} </p>
+<div class="card mb-3" style="max-width: 900px;">
+  <div class="row g-0">
+    <div class="col-lg-4">
+      <img src="{{product.image_url}}" class="img-fluid rounded-start" alt="cube" >
+    </div>
+    <div class="col-md-8">
+      <div class="card-body">
+        <h5 class="card-title">{{product.name}}</h5>
+        <p><strong>Price: </strong>€{{'%.2f' % product.price }}</p>
+        <p class="card-text"><strong>Description: </strong> {{product.description|safe }}</p>
 
-          {% if current_user.is_authenticated and (current_user.id==product.user.id or current_user.id==19) %}
-          <a class="btn btn-primary float-end" href="{{ url_for('update_product', id=product.id)}}"> Edit </a>
-          {% endif %}
+        <p class="card-text"><small class="text-muted">Date added: {{product.created_at.date() }} by {{ product.user.username }}</small></p>
 
-        </div>
       </div>
+    </div>
+    <div class="card-footer">
+      {% if current_user.is_authenticated and (current_user.id==product.user.id or current_user.id==admin) %}
+      <a class="btn btn-primary " href="{{ url_for('update_product', id=product.id)}}"> Edit </a>
+      {% endif %}
+      <a href="{{ url_for('add_to_cart', id=product.id) }}" class="btn btn-primary float-end ">Add to cart</a>
+    </div>
+  </div>
+</div>
 
+<button onclick="history.back();" class="btn btn-primary" > <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-left" viewBox="0 0 16 16"><path d="M10 12.796V3.204L4.519 8 10 12.796zm-.659.753-5.48-4.796a1 1 0 0 1 0-1.506l5.48-4.796A1 1 0 0 1 11 3.204v9.592a1 1 0 0 1-1.659.753z"/></svg>Back </button>
 
 
 {% endblock %}

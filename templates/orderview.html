@@ -1,8 +1,6 @@
 {% extends "layout.html" %}
 
-
-{% block title %} Dashboard {% endblock %}
-
+{% block title %}   Orderview     {% endblock %}
 
 {% block head %}
   {{ super() }}
@@ -11,28 +9,6 @@
 
 {% block content %}
 
-<h1>Dashboard</h1>
-<br>
-<div class="shadow p-3 mb-5 bg-body rounded">
-  <h2>User details</h2>
-  <strong>Username: </strong> {{ current_user.username }} <br>
-  <strong>Email: </strong> {{ current_user.email }} <br>
-  <strong>Address: </strong> {{ current_user.address }} <br>
-  <strong>Postal code: </strong> {{ current_user.postal_code }} <br>
-  <strong>City: </strong> {{ current_user.city }} <br>
-  <strong>Country: </strong> {{ current_user.country }} <br>
-  <strong>Date created:</strong> {{ current_user.created_at.date() }} <br>
-  <br>
-  <a href="{{url_for('logout')}}" class="btn btn-primary">Logout</a>
-  <a href="{{url_for('update_user', id=current_user.id)}}" class="btn btn-warning">Edit Account</a>
-  <a href="{{url_for('delete_user', id=current_user.id)}}" class="btn btn-danger float-end">Delete Account</a>
-</div>
-
-
-{% if order_items %}
-<H2>Your orders</H2>
-
-{% for list in order_items %}
 <!-- shoppingcart recycled -->
 <section class="h-100 h-custom" >
   <div class="container h-100 py-5">
@@ -44,9 +20,12 @@
             <div class="row">
               <div class="col-lg-6 px-5 py-4">
 
-                <h4 class="mb-5 pt-2 text-center fw-bold text-uppercase">Date ordered: {{ list[0].orders.created_at.date() }} </h4>
+                <h3 class="mb-5 pt-2 text-center fw-bold text-uppercase">Your order</h3>
 
-                {% for item in list %}
+                {% if order_items %}
+                <h5>Payment satus: {{ status }} </h5>
+                <h6 style="color: #9e9e9e;">To update your payment status, refresh this page.</h6>
+                {% for item in order_items %}
 
                 <div class="d-flex align-items-center mb-5">
                   <div class="flex-shrink-0">
@@ -56,6 +35,7 @@
                   <div class="flex-grow-1 ms-3">
 
                     <h5 class="text-primary">{{ item.product.name }}</h5>
+
                     <div class="d-flex align-items-center">
                       <p class="fw-bold mb-0 me-5 pe-3">€{{'%.2f' % item.product.price }}</p>
                       <div class="def-number-input number-input ">
@@ -66,8 +46,13 @@
                 </div>
 
                 {% endfor %}
-                <h6> Payment status: {{ list[0].orders.payments.status }} </h6>
-                <h6> Total price: €{{'%.2f' % list[0].orders.payments.amount}} </h6>
+
+                {% else %}
+                You haven't ordered anything yet!
+
+                {% endif %}
+
+
               </div>
             </div>
           </div>
@@ -76,13 +61,6 @@
     </div>
   </div>
 </section>
-
-{% endfor %}
-
-{% else %}
-Your orders will appear here!
-
-{% endif %}
 
 
 

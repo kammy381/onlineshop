@@ -8,31 +8,27 @@
 
 {% block content %}
 
-<br>
-{% for message in get_flashed_messages() %}
-
-  <div class="alert alert-success alert-dismissible fade show" role="alert">
-  <strong>{{ message }}</strong>
-  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-  </div>
-
-{% endfor %}
-
-  <br>
-
     <h2>Products</h2>
     <div class="mygridcontainer">
-      {% if products %}
-      {% for product in products %}
+      {% if products.items %}
+      {% for product in products.items %}
 
       <div class="card " style="width: 18rem;">
-        <img src={{product.image_url}} class="card-img-top" alt="cube image" style="max-height:250px;max-width:250px; display: block; margin-left:auto; margin-right:auto; height:auto;width:auto;">
+        <img src={{product.image_url}} class="card-img-top" alt="cube image" style="height:250px;max-width:250px; display: block; margin-left:auto; margin-right:auto;width:auto;">
         <div class="card-header"><h5 style="text-align: center">{{product.name}}</h5></div>
         <div class="card-body">
-          <div style=" --max-lines: 3; --line-height: 1.4; max-height: calc(var(--max-lines) * 1em * var(--line-height)); line-height: var(--line-height); text-overflow: ellipsis; overflow: hidden; " >{{product.description|safe}}</div>
-          <p> <strong>Price: </strong>€{{'%.2f' % product.price }}</p>
-          <a href="{{ url_for('show_detail',target_id=product['id']) }}" class="btn btn-primary float-end ">Details</a>
+            <!-- elipsis doesn't work -->
+          <div style=" --max-lines: 3; --line-height: 1.4; max-height: calc(var(--max-lines) * 1em * var(--line-height)); line-height: var(--line-height); overflow: hidden " >{{product.description|safe}}</div>
+
         </div>
+        <div class="card-footer">
+          <strong>Price: </strong>€{{'%.2f' % product.price }}
+          <div class="btn-group float-end" role="group" aria-label="Basic example">
+              <a href="{{ url_for('show_detail', id=product.id) }}" class="btn btn-primary  " >Details</a>
+              <a href="{{ url_for('add_to_cart', id=product.id) }}" class="btn btn-primary   "><span class="material-icons" style="color: rgb(255, 255, 255)">shopping_cart</span></a>
+          </div>
+        </div>
+
       </div>
 
       {% endfor %}
@@ -43,5 +39,55 @@
       {% endif %}
 
     </div>
+
+<br>
+<br>
+{% if products.items %}
+    <!-- Pagination Links-->
+<div class="text-right">
+  <a href="{{ url_for('index', page=products.prev_num) }}"
+     class="btn btn-outline-dark
+     {% if products.page == 1 %}disabled{% endif %}" >
+      &laquo;
+  </a>
+<!-- Loop through the number of pages to display a link for each-->
+  {% for page_num in products.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+{% if page_num %}
+<!-- Check for the active page and set the link to "Active"-->
+          {% if products.page == page_num %}
+          <a href="{{ url_for('index', page=page_num) }}"
+             class="btn btn-dark" style="background:#085c77">
+              {{ page_num }}
+          </a>
+          {% else %}
+          <a href="{{ url_for('index', page=page_num) }}"
+             class="btn btn-outline-dark">
+              {{ page_num }}
+          </a>
+          {% endif %}
+      {% else %}
+          ...
+      {% endif %}
+  {% endfor %}
+  <a href="{{ url_for('index', page=products.next_num) }}"
+     class="btn btn-outline-dark
+     {% if products.page == products.pages %}disabled{% endif %}">
+      &raquo;
+  </a>
+</div>
+<p class="text-right mt-3">
+ Showing page {{ products.page }} of {{ products.pages }}
+</p>
+
+{% endif %}
+
+<script>
+
+window.onfocus = function () {
+location.reload()
+isTabActive = true;
+};
+</script>
+
 
 {% endblock %}
