@@ -1,0 +1,54 @@
+{% extends "layout.html" %}
+
+
+{% block title %}   Update User  {% endblock %}
+
+
+{% block head %}
+  {{ super() }}
+
+
+{% endblock %}
+
+
+{% block content %}
+<br>
+{% for message in get_flashed_messages() %}
+
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+  <strong>{{ message }}</strong>
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+
+{% endfor %}
+
+  <div>
+    <br>
+    <h1> Edit Product </h1>
+    <div class="shadow p-3 mb-5 bg-body rounded">
+      <form action="/updateproduct/{{ thing_to_update.id }}" method="POST">
+        {{ form.hidden_tag() }}
+
+        {{ form.name.label(class="form-label") }}
+        {{ form.name(class="form-control", value=thing_to_update.name ) }}
+        <br>
+        {{ form.price.label(class="form-label") }}
+        {{ form.price(class="form-control", value=thing_to_update.price) }}
+        <br>
+        {{ form.image_url.label(class="form-label") }}
+        {{ form.image_url(class="form-control", value=thing_to_update.image_url ) }}
+        <br>
+        {{ form.description.label(class="form-label") }}
+        {{ form.description(class="form-control", rows="7", value=thing_to_update.description) }}
+        <br>
+        {{ form.submit(class="btn btn-primary") }}
+
+        <a href="{{ url_for('delete_product', id=thing_to_update.id) }}" class="btn btn-danger"> Delete Product</a>
+
+      </form>
+      {{ ckeditor.load() }}
+      {{ ckeditor.config(name='description') }}
+
+    </div>
+  </div>
+{% endblock %}

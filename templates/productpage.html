@@ -1,30 +1,40 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+{% extends "layout.html" %}
+{% block title %}Product Page{% endblock %}
+{% block head %}
+  {{ super() }}
 
-    <link rel="stylesheet" href="{{url_for('static', filename='css/style.css')}}">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://getbootstrap.com/docs/5.2/assets/css/docs.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}
+{% block content %}
+<br>
+{% for message in get_flashed_messages() %}
 
-    <title>Product Page</title>
-</head>
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+  <strong>{{ message }}</strong>
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
 
-<body>
+{% endfor %}
+
+
 <h1>Product Details</h1>
 
- <div class="mygriditem">
-     <h1><strong>{{item['productname']}}</strong></h1>
-     <img src="/static/images/{{item['image']}}" alt="picture of a cube" width="300" height="300">
+     <div class="card " style="width: 18rem;">
+        <img src={{product.image_url}} class="card-img-top" alt="cube image" style="max-height:250px;max-width:250px; display: block; margin-left:auto; margin-right:auto; height:auto;width:auto;">
+        <div class="card-header"><h5>{{product.name}}</h5></div>
+        <div class="card-body">
+          <p>{{product.description|safe }}</p>
+          <p><strong>Price: </strong>€{{'%.2f' % product.price }}</p>
+          <p><strong>Added by user: </strong>{{ product.user.username }}</p>
+          <p><strong>Posted at: </strong>{{product.created_at.date() }} </p>
 
-     <p><strong>Price</strong>: €{{item['price']}}</p>
-     <p><strong>Article Number</strong>: {{item['article_number']}} </p>
-     <p><strong>Manufacturer</strong>: {{item['manufacturer']}} </p>
-     <p><strong>Available units</strong>: {{item['available_units']}} </p>
-     <p><strong>Shipment size</strong>: {{item['shipment_size']}} </p>
- </div>
+          {% if current_user.is_authenticated and (current_user.id==product.user.id or current_user.id==19) %}
+          <a class="btn btn-primary float-end" href="{{ url_for('update_product', id=product.id)}}"> Edit </a>
+          {% endif %}
 
-</body>
-</html>
+        </div>
+      </div>
+
+
+
+{% endblock %}
+
