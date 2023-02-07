@@ -57,11 +57,11 @@
               -->
               <a class="nav-link active" href="/howtosolve"><strong style="font-size: 17px; color:white">How to solve</strong></a>&emsp;
             {% if current_user.is_authenticated %}
-              <a class="nav-link active" href="/addproduct"><strong style="font-size: 17px; color:white">Add a product</strong></a>&emsp;
-              <a class="nav-link active" href="/dashboard"><strong style="font-size: 17px; color:white">Dashboard</strong></a>&emsp;
+              <a class="nav-link active" href="{{ url_for('product_form') }}"><strong style="font-size: 17px; color:white">Add a product</strong></a>&emsp;
+              <a class="nav-link active" href="/users/{{ current_user.id }}/dashboard"><strong style="font-size: 17px; color:white">Dashboard</strong></a>&emsp;
               <a class="nav-link active" href="{{ url_for('logout') }}"><strong style="font-size: 17px; color:white">Logout</strong></a>&emsp;
             {% else %}
-              <a class="nav-link active" href="/createuser"><strong style="font-size: 17px; color:white">New user</strong></a>&emsp;
+              <a class="nav-link active" href="{{ url_for ('user_form') }}"><strong style="font-size: 17px; color:white">New user</strong></a>&emsp;
               <a class="nav-link active" href="/login"><strong style="font-size: 17px; color:white">Login</strong></a>&emsp;
 
 

@@ -17,7 +17,7 @@
     <br>
     <h1> Edit Product </h1>
     <div class="shadow p-3 mb-5 bg-body rounded">
-      <form action="/updateproduct/{{ thing_to_update.id }}" method="POST">
+      <form action="/products/{{ thing_to_update.id }}/update" method="POST">
         {{ form.hidden_tag() }}
 
         {{ form.name.label(class="form-label") }}

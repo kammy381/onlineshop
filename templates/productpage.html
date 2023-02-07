@@ -28,7 +28,7 @@
       {% if current_user.is_authenticated and (current_user.id==product.user.id or current_user.id==admin) %}
       <a class="btn btn-primary " href="{{ url_for('update_product', id=product.id)}}"> Edit </a>
       {% endif %}
-      <a href="{{ url_for('add_to_cart',target_id=product['id']) }}" class="btn btn-primary float-end ">Add to cart</a>
+      <a href="{{ url_for('add_to_cart', id=product.id) }}" class="btn btn-primary float-end ">Add to cart</a>
     </div>
   </div>
 </div>

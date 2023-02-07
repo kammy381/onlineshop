@@ -36,7 +36,7 @@ mollie_key=os.getenv("MOLLIE_KEY")
 mollie_client = Client()
 mollie_client.set_api_key(mollie_key)
 
-####need normal url    request.url_root
+
 PUBLIC_URL = 'https://rubikswebshop.onrender.com'
 #PUBLIC_URL = 'ngrok url'
 
@@ -56,10 +56,12 @@ def check_cart(user):
     if 'cart' in session:
         cartnumber = session['cart']
 
-        # delete old cart,  and delete cartless items
+        # delete old cart if the sessioncart id is different,  and delete cartless items
         if cart_check:
             oldcart = Carts.query.get_or_404(cart_check.id)
-            db.session.delete(oldcart)
+
+            if not oldcart.id==cartnumber:
+                db.session.delete(oldcart)
             old_cart_items = db.session.query(Cart_items).filter(Cart_items.cart_id == None).all()
             for item in old_cart_items:
                 db.session.delete(item)
@@ -98,7 +100,7 @@ def login():
                 check_cart(user)
 
                 flash('You have successfully logged in!')
-                return redirect(url_for('dashboard'))
+                return redirect(url_for('dashboard', id=current_user.id))
 
 
     return render_template('login.html', form=form)
@@ -110,9 +112,9 @@ def logout():
     flash("You have been logged out")
     return redirect(url_for('index'))
 
-@app.route('/dashboard', methods=["GET","POST"])
+@app.route('/users/<int:id>/dashboard', methods=["GET","POST"])
 @login_required
-def dashboard():
+def dashboard(id):
     orders= Orders.query.filter(Orders.user_id == current_user.id).order_by(Orders.updated_at.desc())
 
     #this is a list of orderlists
@@ -123,7 +125,7 @@ def dashboard():
         order_list.append(order_items)
 
     return render_template('dashboard.html', order_items=order_list)
-@app.route("/createuser", methods=['GET','POST'])
+@app.route("/users/new", methods=['GET','POST'])
 def user_form():
 
     form = UserForm()
@@ -150,7 +152,7 @@ def user_form():
             flash("This email is already in use!")
 
     return render_template('createuser.html', form=form)
-@app.route('/updateuser/<int:id>', methods=['GET','POST'])   #methods=['PATCH']
+@app.route('/users/<int:id>/update', methods=['GET','POST'])
 @login_required
 def update_user(id):
     form = UserForm()
@@ -177,10 +179,9 @@ def update_user(id):
             return render_template('updateuser.html', form=form, thing_to_update=thing_to_update, id=id)
     else:
         flash("You can only edit your own user!")
-        products = db.session.query(Products).all()
-        return render_template('index.html', products=products)
+        return redirect(url_for('index'))
 
-@app.route('/deleteuser/<int:id>') #, methods=['DELETE']
+@app.route('/users/<int:id>/delete', methods=["GET"])
 @login_required
 def delete_user(id):
     user_to_delete = Users.query.get_or_404(id)
@@ -192,16 +193,15 @@ def delete_user(id):
             db.session.commit()
             flash("User deleted!")
 
-            return render_template('createuser.html', form=form)
+            return redirect(url_for('user_form'))
         except:
             flash('Something went wrong!')
             return render_template('createuser.html', form=form)
     else:
         flash('You can only delete your own user!')
-        products = db.session.query(Products).all()
-        return render_template('index.html', products=products)
+        return redirect(url_for('index'))
 
-@app.route("/addproduct", methods=['GET','POST'])
+@app.route("/products/new", methods=['GET','POST'])
 @login_required
 def product_form():
 
@@ -223,7 +223,7 @@ def product_form():
         return redirect(url_for('product_form'))
 
     return render_template('addproduct.html', form=form)
-@app.route('/updateproduct/<int:id>', methods=['GET','POST'])
+@app.route('/products/<int:id>/update', methods=['GET','POST'])
 @login_required
 def update_product(id):
     form = ProductForm()
@@ -244,36 +244,41 @@ def update_product(id):
             flash("Product updated!")
             return redirect(url_for('show_detail', target_id=thing_to_update.id))
         form.name.data = thing_to_update.name
-        form.price.data= thing_to_update.price
-        form.image_url.data=thing_to_update.image_url
-        form.description.data=thing_to_update.description
+        form.price.data = thing_to_update.price
+        form.image_url.data = thing_to_update.image_url
+        form.description.data = thing_to_update.description
         return render_template('updateproduct.html', form=form, thing_to_update=thing_to_update)
     else:
         flash("Not your product, you can't edit this one!")
-        products = db.session.query(Products).all()
-        return render_template('index.html', products=products)
+        return redirect(url_for('index'))
 
-@app.route('/deleteproduct/<int:id>')
+@app.route('/products/<int:id>/delete')
 @login_required
 def delete_product(id):
     product_to_delete = Products.query.get_or_404(id)
     user_id = current_user.id
-    if user_id == product_to_delete.user.id or user_id==admin:
+    if user_id == product_to_delete.user.id or user_id == admin:
+        cart_items = db.session.query(Cart_items).filter(Cart_items.product_id == id).all()
+        order_lines = db.session.query(Order_lines).filter(Order_lines.product_id == id).all()
         try:
-############ delete from cart_items and from orderlines#################################################################
+            #product gets deleted from cart and orderlines when product gets deleted
+            if cart_items:
+                for item in cart_items:
+                    db.session.delete(item)
+            if order_lines:
+                for item in order_lines:
+                    db.session.delete(item)
+
             db.session.delete(product_to_delete)
             db.session.commit()
             flash("Product deleted!")
-            products = db.session.query(Products).all()
-            return render_template('index.html', products=products)
+            return redirect(url_for('index'))
         except:
             flash('Something went wrong!')
-            products = db.session.query(Products).all()
-            return render_template('index.html', products=products)
+            return redirect(url_for('index'))
     else:
         flash("Not your product! You can't delete this one!")
-        products = db.session.query(Products).all()
-        return render_template('index.html', products=products)
+        return redirect(url_for('index'))
 
 @app.route("/")
 def index():
@@ -308,7 +313,7 @@ def shoppingcart():
     else:
         return render_template('shoppingcart.html')
 
-@app.route('/change_quantity/<int:id>', methods=['GET','POST'])
+@app.route('/shoppingcart/<int:id>/change_quantity', methods=['GET','POST'])
 def change_quantity(id):
 
     cart_item_to_change = Cart_items.query.get_or_404(id)
@@ -335,6 +340,7 @@ def change_quantity(id):
         flash('something went wrong')
         return redirect(url_for('shoppingcart'))
 
+#function to create a cart item when it's added to the cart
 def cart_item(product_id,cart_id):
 
     quantity=1
@@ -350,8 +356,8 @@ def cart_item(product_id,cart_id):
     db.session.add(cart_item)
     db.session.commit()
 
-@app.route("/productpage/<string:target_id>/add_to_cart")
-def add_to_cart(target_id):
+@app.route("/products/<int:id>/add")
+def add_to_cart(id):
     #user is logged in
     if not current_user.is_anonymous:
         cart_check = db.session.query(Carts).filter(Carts.user_id == current_user.id).first()
@@ -361,11 +367,11 @@ def add_to_cart(target_id):
 
         #user doesn't have a cart, let's make one
         else:
-            full_name= None
+            full_name = None
             user_id = current_user.id
             created_at = datetime.now()
             updated_at = datetime.now()
-            cart=Carts(full_name,user_id,created_at,updated_at)
+            cart = Carts(full_name, user_id, created_at ,updated_at)
             db.session.add(cart)
             db.session.commit()
 
@@ -385,7 +391,7 @@ def add_to_cart(target_id):
             user_id = None
             created_at = datetime.now()
             updated_at = datetime.now()
-            cart=Carts(full_name,user_id,created_at,updated_at)
+            cart = Carts(full_name, user_id, created_at, updated_at)
             db.session.add(cart)
             db.session.commit()
 
@@ -394,27 +400,27 @@ def add_to_cart(target_id):
             cartnumber=session['cart']
 
 
-    product = db.session.query(Products).filter(Products.id == target_id).first()
+    product = db.session.query(Products).filter(Products.id == id).first()
 
     if product is None:
         return render_template('error.html')
     else:
         #check if item is in cart_items and if that cart_item is in your cart
-        item_already_in_cart = db.session.query(Cart_items).filter(Cart_items.product_id == target_id, Cart_items.cart_id == cartnumber).first()
+        item_already_in_cart = db.session.query(Cart_items).filter(Cart_items.product_id == id, Cart_items.cart_id == cartnumber).first()
         if item_already_in_cart:
             flash("product already in cart")
-            return redirect(url_for('show_detail', target_id=product.id))
+            return redirect(url_for('show_detail', id=product.id))
         else:
             cart_item(product_id=product.id,cart_id=cartnumber)
             flash(f'{product.name} has been added to your cart')
-            return redirect(url_for('show_detail', target_id=product.id))
+            return redirect(url_for('show_detail', id=product.id))
 
-@app.route("/shoppingcart/<string:item_id>/delete_from_cart")
-def delete_from_cart(item_id):
+@app.route("/shoppingcart/<int:id>/delete")
+def delete_from_cart(id):
 
     #your session cart
     cart_id=session['cart']
-    item_to_delete = Cart_items.query.get_or_404(item_id)
+    item_to_delete = Cart_items.query.get_or_404(id)
     item_to_delete.cart.updated_at = datetime.now()
     if item_to_delete.cart_id == cart_id:
         try:
@@ -441,7 +447,7 @@ def passthrough_searchbar():
     form= SearchForm()
     return dict(form=form)
 
-#passing cartitem amount to layout html page
+#passing cartitem amount to layout html page for the badge counter
 @app.context_processor
 def passthrough_cart():
 
@@ -461,7 +467,7 @@ def search():
     form= SearchForm()
     page = request.args.get('page', 1, type=int)
     if form.validate_on_submit():
-        #paginate or redirect index
+
         product_searched = form.searched.data
 
         products= Products.query.filter(Products.name.ilike('%' + product_searched + '%')).order_by(Products.updated_at).paginate(page=page, per_page=8)
@@ -469,13 +475,12 @@ def search():
         return render_template('index.html',form=form, products=products)
     return render_template('index.html', form=form, products = Products.query.order_by(Products.updated_at).paginate(page=page, per_page=8))
 
-@app.route("/productpage/<string:target_id>")
-def show_detail(target_id):
-    product = db.session.query(Products).filter(Products.id==target_id).first()
+@app.route("/products/<int:id>", methods=['GET'])
+def show_detail(id):
+    product = db.session.query(Products).filter(Products.id==id).first()
     if product is None:
         return render_template('error.html')
     else:
-
         return render_template('productpage.html', product=product, admin=admin)
 
 def order_line(order_id):
