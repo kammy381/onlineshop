@@ -15,8 +15,8 @@ app = Flask(__name__)
 #rich text editor init
 ckeditor = CKEditor(app)
 
-#env_config = os.getenv("APP_SETTINGS", "config.DevelopmentConfig")
-env_config = os.getenv("APP_SETTINGS", "config.ProductionConfig")
+env_config = os.getenv("APP_SETTINGS", "config.DevelopmentConfig")
+#env_config = os.getenv("APP_SETTINGS", "config.ProductionConfig")
 app.config.from_object(env_config)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
 
@@ -130,8 +130,10 @@ def user_form():
 
     form = UserForm()
     if form.validate_on_submit():
-        unique_check = db.session.query(Users).filter(Users.email==form.email.data).first()
-        if unique_check is None:
+
+        unique_check_username = db.session.query(Users).filter(Users.username==form.username.data).first()
+        unique_check_email = db.session.query(Users).filter(Users.email == form.email.data).first()
+        if unique_check_username is None and unique_check_email is None:
             username = form.username.data
             email = form.email.data
             password_hash = generate_password_hash(form.password_hash.data, "sha256")
@@ -149,7 +151,7 @@ def user_form():
             flash("Great Succes!  Account created succesfully")
             return redirect(url_for('login'))
         else:
-            flash("This email is already in use!")
+            flash("This username or email is already in use!")
 
     return render_template('createuser.html', form=form)
 @app.route('/users/<int:id>/update', methods=['GET','POST'])
