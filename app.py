@@ -249,7 +249,7 @@ def update_product(id):
         form.price.data = thing_to_update.price
         form.image_url.data = thing_to_update.image_url
         form.description.data = thing_to_update.description
-        return render_template('updateproduct.html', form=form, id=thing_to_update)
+        return render_template('updateproduct.html', form=form, thing_to_update=thing_to_update)
     else:
         flash("Not your product, you can't edit this one!")
         return redirect(url_for('index'))
