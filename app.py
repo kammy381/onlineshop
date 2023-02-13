@@ -15,7 +15,7 @@ app = Flask(__name__)
 #rich text editor init
 ckeditor = CKEditor(app)
 
-#env_config = os.getenv("APP_SETTINGS", "config.DevelopmentConfig")
+#env_config = os.getenv("APP_SETTINGS", "config.TestingConfig")
 env_config = os.getenv("APP_SETTINGS", "config.ProductionConfig")
 app.config.from_object(env_config)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
@@ -81,8 +81,10 @@ def check_cart(user):
 
 @app.route('/login', methods=["GET","POST"])
 def login():
+
     form = LoginForm()
     if form.validate_on_submit():
+
         user = Users.query.filter_by(username=form.username.data).first()
         if not user:
             flash("That user doesn't exist!")
@@ -101,7 +103,6 @@ def login():
 
                 flash('You have successfully logged in!')
                 return redirect(url_for('dashboard', id=current_user.id))
-
 
     return render_template('login.html', form=form)
 
@@ -130,8 +131,10 @@ def user_form():
 
     form = UserForm()
     if form.validate_on_submit():
-        unique_check = db.session.query(Users).filter(Users.email==form.email.data).first()
-        if unique_check is None:
+
+        unique_check_username = db.session.query(Users).filter(Users.username==form.username.data).first()
+        unique_check_email = db.session.query(Users).filter(Users.email == form.email.data).first()
+        if unique_check_username is None and unique_check_email is None:
             username = form.username.data
             email = form.email.data
             password_hash = generate_password_hash(form.password_hash.data, "sha256")
@@ -149,7 +152,7 @@ def user_form():
             flash("Great Succes!  Account created succesfully")
             return redirect(url_for('login'))
         else:
-            flash("This email is already in use!")
+            flash("This username or email is already in use!")
 
     return render_template('createuser.html', form=form)
 @app.route('/users/<int:id>/update', methods=['GET','POST'])
@@ -186,7 +189,6 @@ def update_user(id):
 def delete_user(id):
     user_to_delete = Users.query.get_or_404(id)
     user_id = current_user.id
-    form = UserForm()
     if user_id == user_to_delete.id or user_id==admin:
         try:
             db.session.delete(user_to_delete)
@@ -196,7 +198,7 @@ def delete_user(id):
             return redirect(url_for('user_form'))
         except:
             flash('Something went wrong!')
-            return render_template('createuser.html', form=form)
+            return redirect(url_for('user_form'))
     else:
         flash('You can only delete your own user!')
         return redirect(url_for('index'))
@@ -242,12 +244,12 @@ def update_product(id):
             db.session.add(thing_to_update)
             db.session.commit()
             flash("Product updated!")
-            return redirect(url_for('show_detail', target_id=thing_to_update.id))
+            return redirect(url_for('show_detail', id=thing_to_update.id))
         form.name.data = thing_to_update.name
         form.price.data = thing_to_update.price
         form.image_url.data = thing_to_update.image_url
         form.description.data = thing_to_update.description
-        return render_template('updateproduct.html', form=form, thing_to_update=thing_to_update)
+        return render_template('updateproduct.html', form=form, id=thing_to_update)
     else:
         flash("Not your product, you can't edit this one!")
         return redirect(url_for('index'))

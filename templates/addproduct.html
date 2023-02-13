@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 
-{% block title %}   Add a product   {% endblock %}
+{% block title %}Add a product{% endblock %}
 
 
 {% block head %}
@@ -20,15 +20,35 @@
 
     {{ form.name.label(class="form-label") }}
     {{ form.name(class="form-control" ) }}
+
     <br>
     {{ form.price.label(class="form-label") }}
     {{ form.price(class="form-control" ) }}
+
     <br>
     {{ form.image_url.label(class="form-label") }}
     {{ form.image_url(class="form-control" ) }}
+
+    {% if form.image_url.errors %}
+    <ul class="errors">
+    {% for error in form.image_url.errors %}
+        <li style="list-style-type: none; color: red">{{ error }}</li>
+    {% endfor %}
+    </ul>
+    {% endif %}
+
     <br>
     {{ form.description.label(class="form-label") }}
     {{ form.description(class="form-control", rows="7" ) }}
+
+    {% if form.description.errors %}
+    <ul class="errors">
+    {% for error in form.description.errors %}
+        <li style="list-style-type: none; color: red">{{ error }}</li>
+    {% endfor %}
+    </ul>
+    {% endif %}
+
     <br>
     {{ form.submit(class="btn btn-primary") }}
 

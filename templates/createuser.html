@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 
-{% block title %}   Create User  {% endblock %}
+{% block title %}Create User{% endblock %}
 
 
 {% block head %}
@@ -26,10 +26,26 @@
         <br>
         {{ form.email.label(class="form-label") }}
         {{ form.email(class="form-control" ) }}
+
+        {% if form.email.errors %}
+        <ul class="errors">
+        {% for error in form.email.errors %}
+            <li style="list-style-type: none; color: red">{{ error }}</li>
+        {% endfor %}
+        </ul>
+        {% endif %}
         <br>
 
         {{ form.password_hash.label(class="form-label") }}
         {{ form.password_hash(class="form-control" ) }}
+
+        {% if form.password_hash.errors %}
+        <ul class="errors">
+        {% for error in form.password_hash.errors %}
+            <li style="list-style-type: none; color: red">{{ error }}</li>
+        {% endfor %}
+        </ul>
+        {% endif %}
 
         <br>
         {{ form.password_hash2.label(class="form-label") }}
