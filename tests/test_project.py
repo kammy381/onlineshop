@@ -1,11 +1,10 @@
-from models import Users, Products
+from models import Products, Users, Carts, Cart_items, Orders,Order_lines, Payments
 
 #test staticpages
 def test_index(client):
     response = client.get("/")
     #b to convert t bytes
     assert b"<title>Index</title>" in response.data
-
 
 def test_howtosolve(client):
     response = client.get("/howtosolve")
@@ -21,7 +20,6 @@ def test_aboutme(client):
     response = client.get("/aboutme")
     # b to convert t bytes
     assert b"<p>This website is a project by Kamil Romasz ;) </p>" in response.data
-
 
 #test other
 def test_register(client, app):
@@ -118,20 +116,10 @@ def test_newproduct(client, app):
     client.post("/users/new", data=dict(
         [('username', 'testuser'), ('email', 'testuser@hotmail.com'), ('password_hash', '123'),
          ('password_hash2', '123'), ('address', '123'), ('postal_code', '123'), ('city', '123'), ('country', '123')]))
-    # go to login page
-    resp1 = client.get("/login")
-    assert b"<h1>Login</h1>" in resp1.data
-
-    with app.app_context():
-
-        assert Users.query.count() == 1
-        assert Users.query.first().email == "testuser@hotmail.com"
 
     # login
     resp2 = client.post("/login", data=dict([('username', 'testuser'), ('password', '123')]), follow_redirects=True)
 
-    # check if user is redirected to dashboard after loging in
-    assert b"<h1>Dashboard</h1>" in resp2.data
 
     resp3= client.get("/products/new", follow_redirects=True)
     assert b"<title>Add a product</title>" in resp3.data
@@ -144,19 +132,84 @@ def test_newproduct(client, app):
 
     assert b"<title>Add a product</title>" in resp4.data
 
-def test_register_login_logout_again(client, app):
+def test_showdetails(client,app):
+    # register
+    client.post("/users/new", data=dict(
+        [('username', 'testuser'), ('email', 'testuser@hotmail.com'), ('password_hash', '123'),
+         ('password_hash2', '123'), ('address', '123'), ('postal_code', '123'), ('city', '123'), ('country', '123')]))
+    # login
+    client.post("/login", data=dict([('username', 'testuser'), ('password', '123')]), follow_redirects=True)
+    # add a product
+    client.post("/products/new", data=dict(
+        [('user_id', '1'), ('name', 'testproduct'), ('price', '123'), ('image_url', 'https://i.ibb.co/cYCby3R/r4.png'),
+         ('description', 'test descp')]), follow_redirects=True)
+    #show details
+    resp2 = client.get("/products/1", follow_redirects=True)
+
+    assert b'<h5 class="card-title">testproduct</h5>' in resp2.data
+
+def test_productupdate(client, app):
     #register
-    client.post("/users/new", data=dict([('username', 'testuser'), ('email', 'testuser@hotmail.com'), ('password_hash', '123'), ('password_hash2', '123'), ('address', '123'), ('postal_code', '123'), ('city', '123'), ('country', '123')]) )
+    client.post("/users/new", data=dict(
+        [('username', 'testuser'), ('email', 'testuser@hotmail.com'), ('password_hash', '123'),
+         ('password_hash2', '123'), ('address', '123'), ('postal_code', '123'), ('city', '123'), ('country', '123')]))
 
-    #login
-    resp2=client.post("/login", data=dict([('username', 'testuser'), ('password', '123')]), follow_redirects=True)
+    # login
+    client.post("/login", data=dict([('username', 'testuser'), ('password', '123')]), follow_redirects=True)
+    # add a product
+    client.post("/products/new", data=dict([('user_id', '1'), ('name', 'testproduct'), ('price', '123'), ('image_url', 'https://i.ibb.co/cYCby3R/r4.png'), ('description', 'test descp')]), follow_redirects=True )
+    #check db
+    with app.app_context():
+        assert Products.query.first().name == "testproduct"
+    #check update page
+    resp1= client.get("/products/1/update", follow_redirects=True)
+    assert b"<h1> Edit Product </h1>" in resp1.data
+    #update product
+    resp2=client.post("/products/1/update", data=dict([('user_id', '1'), ('name', 'newname'), ('price', '123'), ('image_url', 'https://i.ibb.co/cYCby3R/r4.png'), ('description', 'test descp')]), follow_redirects=True)
+    #check db
+    with app.app_context():
+        assert Products.query.first().name == "newname"
+    #check redirect
+    assert b"<h1>Product Details</h1>" in resp2.data
 
-    #check if user is redirected to dashboard after loging in
-    assert b"<h1>Dashboard</h1>" in resp2.data
+def test_productdelete(client, app):
+    #register
+    client.post("/users/new", data=dict(
+        [('username', 'testuser'), ('email', 'testuser@hotmail.com'), ('password_hash', '123'),
+         ('password_hash2', '123'), ('address', '123'), ('postal_code', '123'), ('city', '123'), ('country', '123')]))
 
-    #logout
-    resp3=client.get("/logout", follow_redirects=True)
+    # login
+    client.post("/login", data=dict([('username', 'testuser'), ('password', '123')]), follow_redirects=True)
+    # add a product
+    client.post("/products/new", data=dict([('user_id', '1'), ('name', 'testproduct'), ('price', '123'), ('image_url', 'https://i.ibb.co/cYCby3R/r4.png'), ('description', 'test descp')]), follow_redirects=True )
+    #check db
+    with app.app_context():
+        assert Products.query.first().name == "testproduct"
 
-    #check if user redirected to indexpage after logging out
-    assert b"<title>Index</title>" in resp3.data
+    #delete product
+    resp1=client.get("/products/1/delete", follow_redirects=True)
+    #check db
+    with app.app_context():
+        assert Products.query.count() == 0
+    #check redirect
+    assert b"<title>Index</title>" in resp1.data
+
+def test_search(client):
+    # register
+    client.post("/users/new", data=dict(
+        [('username', 'testuser'), ('email', 'testuser@hotmail.com'), ('password_hash', '123'),
+         ('password_hash2', '123'), ('address', '123'), ('postal_code', '123'), ('city', '123'), ('country', '123')]))
+    # login
+    client.post("/login", data=dict([('username', 'testuser'), ('password', '123')]), follow_redirects=True)
+
+    resp=client.post("/search", data=dict([('searched',"test")]), follow_redirects=True)
+    assert b"No products found :( !" in resp.data
+
+    # add a product
+    client.post("/products/new", data=dict(
+        [('user_id', '1'), ('name', 'testproduct'), ('price', '123'), ('image_url', 'https://i.ibb.co/cYCby3R/r4.png'),
+         ('description', 'test descp')]), follow_redirects=True)
+
+    resp2=client.post("/search", data=dict([('searched',"test")]), follow_redirects=True)
+    assert b"testproduct" in resp2.data
 
