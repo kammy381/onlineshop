@@ -213,3 +213,36 @@ def test_search(client):
     resp2=client.post("/search", data=dict([('searched',"test")]), follow_redirects=True)
     assert b"testproduct" in resp2.data
 
+def test_shoppingcart(client,app):
+    # register
+    client.post("/users/new", data=dict(
+        [('username', 'testuser'), ('email', 'testuser@hotmail.com'), ('password_hash', '123'),
+         ('password_hash2', '123'), ('address', '123'), ('postal_code', '123'), ('city', '123'), ('country', '123')]))
+    # login
+    client.post("/login", data=dict([('username', 'testuser'), ('password', '123')]), follow_redirects=True)
+    # add a product
+    client.post("/products/new", data=dict(
+        [('user_id', '1'), ('name', 'testproduct'), ('price', '123'), ('image_url', 'https://i.ibb.co/cYCby3R/r4.png'),
+         ('description', 'test descp')]), follow_redirects=True)
+    #check empty cart
+    resp3 = client.get("/shoppingcart", follow_redirects=True)
+    assert b'Your shoppingcart is empty!' in resp3.data
+
+    # add a product to cart
+    resp1=client.get("/products/1/add",follow_redirects=True)
+    assert b'<h5 class="card-title">testproduct</h5>' in resp1.data
+
+    #there should be a cart and a cartitem
+    with app.app_context():
+        assert Carts.query.count() == 1
+        assert Cart_items.query.count() == 1
+
+    resp2 = client.get("/shoppingcart", follow_redirects=True)
+    assert b'<h5 class="text-primary">testproduct</h5>' in resp2.data
+
+
+
+
+
+
+
