@@ -236,10 +236,40 @@ def test_shoppingcart(client,app):
     with app.app_context():
         assert Carts.query.count() == 1
         assert Cart_items.query.count() == 1
-
+    #the cart shows the product
     resp2 = client.get("/shoppingcart", follow_redirects=True)
     assert b'<h5 class="text-primary">testproduct</h5>' in resp2.data
+    #change quantity in cart
+    resp4=client.post("/shoppingcart/1/change_quantity", data=dict([("quantity", '4')]), follow_redirects=True)
+    assert b'<input class="quantity fw-bold text-black "  min="1" max="99"  name="quantity" value="4" type="number" readonly>' in resp4.data
+    with app.app_context():
+        cart=Cart_items.query.first()
+        assert cart.quantity==4
 
+
+def test_order(client,app):
+    # register
+    client.post("/users/new", data=dict(
+        [('username', 'testuser'), ('email', 'testuser@hotmail.com'), ('password_hash', '123'),
+         ('password_hash2', '123'), ('address', '123'), ('postal_code', '123'), ('city', '123'), ('country', '123')]))
+    # login
+    client.post("/login", data=dict([('username', 'testuser'), ('password', '123')]), follow_redirects=True)
+    # add a product
+    client.post("/products/new", data=dict(
+        [('user_id', '1'), ('name', 'testproduct'), ('price', '123'), ('image_url', 'https://i.ibb.co/cYCby3R/r4.png'),
+         ('description', 'test descp')]), follow_redirects=True)
+
+    # add a product to cart
+    resp1=client.get("/products/1/add",follow_redirects=True)
+    assert b'<h5 class="card-title">testproduct</h5>' in resp1.data
+
+    #not following the redirect to mollie here
+    client.post("/shoppingcart/order", data=dict([('email', 'testuser@testmail.com'), ('fullname', 'testname')]))
+    with app.app_context():
+        #order gets made, payment made, cart deleted from db
+        assert Orders.query.count()== 1
+        assert Payments.query.count() == 1
+        assert Carts.query.count() == 0
 
 
 
