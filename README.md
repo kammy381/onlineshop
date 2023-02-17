@@ -1,7 +1,8 @@
 # WebShop 
 See the work in progress version at:  https://rubikswebshop.onrender.com/ <br>
 Most recent version is in the improvements branch: https://github.com/kammy381/onlineshop/tree/improvements <br>
-the deployed version is in the masterbranch.
+The app gets automaticly tested on github on push <br>
+The deployed version is in the masterbranch.
 
 ## What is this app about?
 This app is an online shop. <br>
@@ -17,8 +18,8 @@ Things you can do:<br>
 ## Goals for this project
 -learn how to build a database that supports a webshop<br>
 -use flask to build a little shop that works<br>
--deploy the app and the database
-
+-deploy the app and the database<br>
+-write automated tests for the app
 ## Little preview
 
 
