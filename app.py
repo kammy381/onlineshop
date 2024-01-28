@@ -1,9 +1,11 @@
 from flask import Flask, render_template, flash, request, redirect, url_for, session, abort
+from flask.cli import FlaskGroup
+from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 import os
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
+from flask_login import login_user, LoginManager, login_required, logout_user, current_user
 from webforms import ProductForm, UserForm, LoginForm, SearchForm
 from flask_ckeditor import CKEditor
 from mollie.api.client import Client
@@ -12,7 +14,6 @@ from mollie.api.error import Error
 
 app = Flask(__name__)
 
-#rich text editor init
 ckeditor = CKEditor(app)
 
 #env_config = os.getenv("APP_SETTINGS", "config.TestingConfig")
@@ -22,6 +23,8 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
 
 db = SQLAlchemy(app)
 
+cli = FlaskGroup(app)
+migrate = Migrate(app, db)
 from models import Products, Users, Carts, Cart_items, Orders,Order_lines, Payments
 
 
@@ -37,11 +40,10 @@ mollie_client = Client()
 mollie_client.set_api_key(mollie_key)
 
 
-PUBLIC_URL = 'https://rubikswebshop.onrender.com'
-#PUBLIC_URL = 'ngrok url'
+PUBLIC_URL = 'http://213.93.85.92/'  #need to make one for https
 
-#admin  it's just user id=1 from db, needs to be sent to each site that checks for admin in template
-admin=1
+#admin  it's just user id=2 from db, needs to be sent to each site that checks for admin in template
+admin=2
 
 
 @login_manager.user_loader
@@ -62,7 +64,7 @@ def check_cart(user):
 
             if not oldcart.id==cartnumber:
                 db.session.delete(oldcart)
-            old_cart_items = db.session.query(Cart_items).filter(Cart_items.cart_id == None).all()
+            old_cart_items = db.session.query(Cart_items).filter(Cart_items.cart_id is None).all()
             for item in old_cart_items:
                 db.session.delete(item)
 
@@ -137,7 +139,7 @@ def user_form():
         if unique_check_username is None and unique_check_email is None:
             username = form.username.data
             email = form.email.data
-            password_hash = generate_password_hash(form.password_hash.data, "sha256")
+            password_hash = generate_password_hash(form.password_hash.data, method='pbkdf2', salt_length=16)
             address = form.address.data
             postal_code = form.postal_code.data
             city = form.city.data
@@ -165,7 +167,7 @@ def update_user(id):
         if request.method =='POST':
             thing_to_update.username=request.form['username']
             thing_to_update.email=request.form['email']
-            thing_to_update.password_hash = generate_password_hash(form.password_hash.data, "sha256")
+            thing_to_update.password_hash = generate_password_hash(form.password_hash.data, method='pbkdf2', salt_length=16)
             thing_to_update.address = request.form['address']
             thing_to_update.postal_code = request.form['postal_code']
             thing_to_update.city = request.form['city']
@@ -580,7 +582,7 @@ def order():
             db.session.commit()
 
 
-            session['key'] = generate_password_hash(str(order.id), "sha256")
+            session['key'] = generate_password_hash(str(order.id), method='pbkdf2', salt_length=16)
 
             # also make a thing to pull fullname and maybe add bank number########
 

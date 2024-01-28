@@ -1,9 +1,6 @@
 from app import db
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
-
-#alleen nodig voor json in column    db.Column(JSON)
-from sqlalchemy.dialects.postgresql import JSON
+from flask_login import UserMixin
 
 
 class Products(db.Model):
@@ -23,7 +20,6 @@ class Products(db.Model):
     cart_items = db.relationship('Cart_items', backref='product')
     order_lines = db.relationship('Order_lines', backref='product')
 
-    #runs when we create a new one
     def __init__(self, name, price, image_url, description, created_at, updated_at, user_id):
 
         self.name = name
@@ -49,8 +45,6 @@ class Cart_items(db.Model):
     updated_at = db.Column(db.DateTime)
 
 
-
-    #runs when we create a new one
     def __init__(self, product_id,cart_id, quantity, created_at, updated_at):
 
         self.product_id = product_id
@@ -145,7 +139,7 @@ class Users(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(30), nullable=False, unique=True)
     email = db.Column(db.String(50), nullable=False, unique=True)
-    password_hash = db.Column(db.String(100), nullable=False)
+    password_hash = db.Column(db.String(200), nullable=False)
 
     address = db.Column(db.String(100), nullable=False)
     postal_code = db.Column(db.String(20), nullable=False)
@@ -170,7 +164,7 @@ class Users(db.Model, UserMixin):
         return check_password_hash(self.password_hash, password)
 
     # runs when we create a new one
-    def __init__(self,username, email, password_hash, address, postal_code, city, country, created_at, updated_at):
+    def __init__(self, username, email, password_hash, address, postal_code, city, country, created_at, updated_at):
 
         self.username = username
         self.email = email

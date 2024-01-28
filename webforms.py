@@ -1,18 +1,16 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, DecimalField, TextAreaField, PasswordField,ValidationError
-from wtforms.validators import DataRequired, NumberRange, URL, Email, EqualTo, Length
-from wtforms.widgets import TextArea
+from wtforms import StringField, SubmitField, DecimalField, PasswordField
+from wtforms.validators import DataRequired, NumberRange, URL, Email, EqualTo
 from flask_ckeditor import CKEditorField
 
 
-##add price format so it's 2 decimals
 class ProductForm(FlaskForm):
     name = StringField("Product name:", validators=[DataRequired()])
     price = DecimalField("Price:", validators=[DataRequired(), NumberRange(min=0.01,max=99999)])
     image_url = StringField("Image url:", validators=[URL(message='wrong url')])
-    #description = StringField("Product description:", validators=[DataRequired()], widget=TextArea())
     description = CKEditorField("Product description", validators=[DataRequired()])
     submit = SubmitField("Submit")
+
 
 class UserForm(FlaskForm):
     username = StringField("Username:", validators=[DataRequired()])
@@ -30,6 +28,7 @@ class LoginForm(FlaskForm):
     username = StringField("Username:", validators=[DataRequired()])
     password = PasswordField("Password:", validators=[DataRequired()])
     submit = SubmitField("Submit")
+
 
 class SearchForm(FlaskForm):
     searched = StringField("Searched", validators=[DataRequired()])
